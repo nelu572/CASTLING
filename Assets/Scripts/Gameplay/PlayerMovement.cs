@@ -9,6 +9,7 @@ public sealed class PlayerMovement : MonoBehaviour
     private Rigidbody2D body;
     private BoxCollider2D bodyCollider;
     private PlayerInput playerInput;
+    private PlayerGroundParticles groundParticles;
     private InputAction jumpAction;
 
     private readonly Collider2D[] groundCheckResults = new Collider2D[4];
@@ -17,12 +18,15 @@ public sealed class PlayerMovement : MonoBehaviour
     private float horizontalInput;
     private float lastGroundedAt = float.NegativeInfinity;
     private float jumpBufferedUntil = float.NegativeInfinity;
+    private bool wasGrounded;
+    private bool hasInitializedGroundState;
 
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
         bodyCollider = GetComponent<BoxCollider2D>();
         playerInput = GetComponent<PlayerInput>();
+        groundParticles = GetComponent<PlayerGroundParticles>();
         int groundLayerMask = LayerMask.GetMask(Layers.Environment, Layers.Player);
         if (body == null || bodyCollider == null || playerInput == null || settings == null || groundLayerMask == 0)
         {
@@ -64,9 +68,19 @@ public sealed class PlayerMovement : MonoBehaviour
     {
         float targetSpeed = horizontalInput * settings.MaximumRunSpeed;
         bool hasMoveInput = !Mathf.Approximately(horizontalInput, 0f);
-        if (IsGrounded())
+        bool hasGroundContact = IsGrounded();
+        bool justLanded = hasInitializedGroundState && hasGroundContact && !wasGrounded;
+        if (hasGroundContact)
         {
             lastGroundedAt = Time.time;
+        }
+
+        wasGrounded = hasGroundContact;
+        hasInitializedGroundState = true;
+        groundParticles?.SetWalking(hasMoveInput && hasGroundContact);
+        if (justLanded)
+        {
+            groundParticles?.PlayLanding();
         }
 
         bool isGrounded = Time.time - lastGroundedAt <= settings.CoyoteTime;
@@ -82,6 +96,7 @@ public sealed class PlayerMovement : MonoBehaviour
             velocity.y = settings.JumpSpeed;
             jumpBufferedUntil = float.NegativeInfinity;
             lastGroundedAt = float.NegativeInfinity;
+            groundParticles?.PlayJump();
         }
 
         bool shouldUseFallGravity = velocity.y < 0f
