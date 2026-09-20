@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7629772249514140952}
   - component: {fileID: 7277345370636704768}
   - component: {fileID: 5085021268437071497}
+  - component: {fileID: 509060567034277017}
   m_Layer: 8
   m_Name: King
   m_TagString: Player
@@ -33,8 +34,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2181964210401641116}
-  - {fileID: 949660022368575959}
+  - {fileID: 408444378570486791}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &8933673450178357126
@@ -153,6 +153,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings: {fileID: 11400000, guid: 589167dc97b08694b8559b7d4bc2f175, type: 2}
+--- !u!114 &509060567034277017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5274617864318369794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dce3c7eb8f811ba4898bd6f9ad0a6d46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  walkEffect: {fileID: 0}
+  jumpEffect: {fileID: 0}
+  landingEffect: {fileID: 0}
+  footstepInterval: 0.32
 --- !u!1 &7381553715379894862
 GameObject:
   m_ObjectHideFlags: 0
@@ -183,7 +199,7 @@ Transform:
   m_LocalScale: {x: 0.6, y: 0.55, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7652551681803121656}
+  m_Father: {fileID: 408444378570486791}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2370719726639419359
 SpriteRenderer:
@@ -270,7 +286,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7652551681803121656}
+  m_Father: {fileID: 408444378570486791}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &749317115402592023
 SpriteRenderer:
@@ -327,3 +343,36 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &9127765730038898885
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 408444378570486791}
+  m_Layer: 0
+  m_Name: Visuals
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &408444378570486791
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9127765730038898885}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2181964210401641116}
+  - {fileID: 949660022368575959}
+  m_Father: {fileID: 7652551681803121656}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
