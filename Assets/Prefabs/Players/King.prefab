@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7277345370636704768}
   - component: {fileID: 5085021268437071497}
   - component: {fileID: 509060567034277017}
-  - component: {fileID: 7629772249514140952}
+  - component: {fileID: 3216277709502846996}
   - component: {fileID: 6101428158820500082}
   m_Layer: 8
   m_Name: King
@@ -124,8 +124,8 @@ MonoBehaviour:
   jumpEffect: {fileID: 0}
   landingEffect: {fileID: 0}
   footstepInterval: 0.32
---- !u!61 &7629772249514140952
-BoxCollider2D:
+--- !u!60 &3216277709502846996
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -168,8 +168,13 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.7085714, y: 2.9942858}
-  m_EdgeRadius: 0
+  m_Points:
+    m_Paths:
+    - - {x: -0.68, y: -1.497}
+      - {x: 0.68, y: -1.497}
+      - {x: 0.44, y: 1.25}
+      - {x: -0.44, y: 1.25}
+  m_UseDelaunayMesh: 0
 --- !u!114 &6101428158820500082
 MonoBehaviour:
   m_ObjectHideFlags: 0

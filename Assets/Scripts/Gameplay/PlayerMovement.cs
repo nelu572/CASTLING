@@ -1,13 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(PlayerInput))]
+[RequireComponent(typeof(Rigidbody2D), typeof(PolygonCollider2D), typeof(PlayerInput))]
 public sealed class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private PlayerMovementSettings settings;
 
     private Rigidbody2D body;
-    private BoxCollider2D bodyCollider;
+    private Collider2D bodyCollider;
     private PlayerInput playerInput;
     private PlayerGroundParticles groundParticles;
     private PlayerEyes eyes;
@@ -25,7 +25,7 @@ public sealed class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
-        bodyCollider = GetComponent<BoxCollider2D>();
+        bodyCollider = GetComponent<PolygonCollider2D>();
         playerInput = GetComponent<PlayerInput>();
         groundParticles = GetComponent<PlayerGroundParticles>();
         eyes = GetComponent<PlayerEyes>();
