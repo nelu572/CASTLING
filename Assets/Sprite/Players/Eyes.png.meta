@@ -137,6 +137,50 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Eye_Left
+      rect:
+        serializedVersion: 2
+        x: 488
+        y: 542
+        width: 86
+        height: 170
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f49307b12536aa641af5995c293db69a
+      internalID: 1108489502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Eye_Right
+      rect:
+        serializedVersion: 2
+        x: 681
+        y: 542
+        width: 86
+        height: 170
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67eb3e2f79dc6fe458d9aeffbd120016
+      internalID: 1920325579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -151,6 +195,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
+      Eye_Left: 1108489502
+      Eye_Right: 1920325579
       Eyes: 416152063598454323
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0

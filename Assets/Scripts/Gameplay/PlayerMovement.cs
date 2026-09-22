@@ -10,6 +10,7 @@ public sealed class PlayerMovement : MonoBehaviour
     private BoxCollider2D bodyCollider;
     private PlayerInput playerInput;
     private PlayerGroundParticles groundParticles;
+    private PlayerEyes eyes;
     private InputAction jumpAction;
 
     private readonly Collider2D[] groundCheckResults = new Collider2D[4];
@@ -27,6 +28,7 @@ public sealed class PlayerMovement : MonoBehaviour
         bodyCollider = GetComponent<BoxCollider2D>();
         playerInput = GetComponent<PlayerInput>();
         groundParticles = GetComponent<PlayerGroundParticles>();
+        eyes = GetComponent<PlayerEyes>();
         int groundLayerMask = LayerMask.GetMask(Layers.Environment, Layers.Player);
         if (body == null || bodyCollider == null || playerInput == null || settings == null || groundLayerMask == 0)
         {
@@ -54,6 +56,7 @@ public sealed class PlayerMovement : MonoBehaviour
     public void OnMove(InputValue inputValue)
     {
         horizontalInput = inputValue.Get<float>();
+        eyes?.SetLookDirection(horizontalInput);
     }
 
     public void OnJump(InputValue inputValue)
