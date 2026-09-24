@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 509060567034277017}
   - component: {fileID: 3216277709502846996}
   - component: {fileID: 6101428158820500082}
+  - component: {fileID: 4243127128993642624}
   m_Layer: 8
   m_Name: King
   m_TagString: Player
@@ -123,7 +124,7 @@ MonoBehaviour:
   walkEffect: {fileID: 0}
   jumpEffect: {fileID: 0}
   landingEffect: {fileID: 0}
-  footstepInterval: 0.32
+  footstepDistance: 0.9
 --- !u!60 &3216277709502846996
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -172,8 +173,14 @@ PolygonCollider2D:
     m_Paths:
     - - {x: -0.68, y: -1.497}
       - {x: 0.68, y: -1.497}
+      - {x: 0.78, y: -1.2}
+      - {x: 0.55, y: -0.2}
+      - {x: 0.29, y: 0.74}
       - {x: 0.44, y: 1.25}
       - {x: -0.44, y: 1.25}
+      - {x: -0.29, y: 0.74}
+      - {x: -0.55, y: -0.2}
+      - {x: -0.78, y: -1.2}
   m_UseDelaunayMesh: 0
 --- !u!114 &6101428158820500082
 MonoBehaviour:
@@ -192,6 +199,25 @@ MonoBehaviour:
   largerEyeShift: 0.125
   smallerEyeShift: 0.075
   shiftSpeed: 1.5
+--- !u!114 &4243127128993642624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5274617864318369794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5696d6b4336bf545ac093d61ba10a40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visuals: {fileID: 408444378570486791}
+  landingSquash: 0.09
+  playerCollisionSquash: 0.07
+  recoveryTime: 0.16
+  minimumPlayerImpactSpeed: 0.5
+  stepSquash: 0.025
+  stepDuration: 0.12
 --- !u!1 &7010876972473807390
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 927222049850927516}
   - component: {fileID: 1009655146372570338}
   - component: {fileID: 7541195695270412806}
+  - component: {fileID: 446899741395577889}
   m_Layer: 8
   m_Name: Rook
   m_TagString: Player
@@ -123,7 +124,7 @@ MonoBehaviour:
   walkEffect: {fileID: 0}
   jumpEffect: {fileID: 0}
   landingEffect: {fileID: 0}
-  footstepInterval: 0.32
+  footstepDistance: 0.9
 --- !u!60 &1009655146372570338
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -172,8 +173,12 @@ PolygonCollider2D:
     m_Paths:
     - - {x: -0.6, y: -1.387}
       - {x: 0.6, y: -1.387}
-      - {x: 0.4, y: 0.24}
-      - {x: -0.4, y: 0.24}
+      - {x: 0.68, y: -1.15}
+      - {x: 0.48, y: -0.5}
+      - {x: 0.56, y: 0.24}
+      - {x: -0.56, y: 0.24}
+      - {x: -0.48, y: -0.5}
+      - {x: -0.68, y: -1.15}
   m_UseDelaunayMesh: 0
 --- !u!114 &7541195695270412806
 MonoBehaviour:
@@ -192,6 +197,25 @@ MonoBehaviour:
   largerEyeShift: 0.125
   smallerEyeShift: 0.075
   shiftSpeed: 1.5
+--- !u!114 &446899741395577889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847224987886657651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5696d6b4336bf545ac093d61ba10a40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visuals: {fileID: 8911893145517031691}
+  landingSquash: 0.09
+  playerCollisionSquash: 0.07
+  recoveryTime: 0.16
+  minimumPlayerImpactSpeed: 0.5
+  stepSquash: 0.025
+  stepDuration: 0.12
 --- !u!1 &3412147566967647292
 GameObject:
   m_ObjectHideFlags: 0

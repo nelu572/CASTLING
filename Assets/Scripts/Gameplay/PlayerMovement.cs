@@ -11,7 +11,7 @@ public sealed class PlayerMovement : MonoBehaviour
     private PlayerInput playerInput;
     private PlayerGroundParticles groundParticles;
     private PlayerEyes eyes;
-    private InputAction jumpAction;
+    private PlayerVisualFeedback visualFeedback;
 
     private readonly Collider2D[] groundCheckResults = new Collider2D[4];
     private ContactFilter2D groundFilter;
@@ -29,6 +29,7 @@ public sealed class PlayerMovement : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         groundParticles = GetComponent<PlayerGroundParticles>();
         eyes = GetComponent<PlayerEyes>();
+        visualFeedback = GetComponent<PlayerVisualFeedback>();
         int groundLayerMask = LayerMask.GetMask(Layers.Environment, Layers.Player);
         if (body == null || bodyCollider == null || playerInput == null || settings == null || groundLayerMask == 0)
         {
@@ -40,11 +41,6 @@ public sealed class PlayerMovement : MonoBehaviour
         groundFilter.SetLayerMask(groundLayerMask);
         groundFilter.useTriggers = false;
         body.gravityScale = settings.GravityScale;
-    }
-
-    private void Start()
-    {
-        jumpAction = playerInput.currentActionMap?.FindAction("Jump");
     }
 
     private void OnDisable()
@@ -69,9 +65,14 @@ public sealed class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        bool hasGroundContact = IsGrounded(out Rigidbody2D groundBody);
         float targetSpeed = horizontalInput * settings.MaximumRunSpeed;
+        if (hasGroundContact && groundBody != null)
+        {
+            targetSpeed += groundBody.linearVelocity.x;
+        }
+
         bool hasMoveInput = !Mathf.Approximately(horizontalInput, 0f);
-        bool hasGroundContact = IsGrounded();
         bool justLanded = hasInitializedGroundState && hasGroundContact && !wasGrounded;
         if (hasGroundContact)
         {
@@ -80,21 +81,25 @@ public sealed class PlayerMovement : MonoBehaviour
 
         wasGrounded = hasGroundContact;
         hasInitializedGroundState = true;
-        groundParticles?.SetWalking(hasMoveInput && hasGroundContact);
+        if (groundParticles != null && groundParticles.SetWalking(hasMoveInput && hasGroundContact))
+        {
+            visualFeedback?.PlayStep();
+        }
         if (justLanded)
         {
             groundParticles?.PlayLanding();
+            visualFeedback?.PlayLanding();
         }
 
-        bool isGrounded = Time.time - lastGroundedAt <= settings.CoyoteTime;
+        bool canJump = Time.time - lastGroundedAt <= settings.CoyoteTime;
         float acceleration = hasMoveInput
-            ? (isGrounded ? settings.GroundAcceleration : settings.AirAcceleration)
-            : settings.GroundDeceleration;
+            ? (hasGroundContact ? settings.GroundAcceleration : settings.AirAcceleration)
+            : (hasGroundContact ? settings.GroundDeceleration : settings.AirAcceleration);
 
         Vector2 velocity = body.linearVelocity;
         velocity.x = Mathf.MoveTowards(velocity.x, targetSpeed, acceleration * Time.fixedDeltaTime);
 
-        if (jumpBufferedUntil >= Time.time && isGrounded)
+        if (jumpBufferedUntil >= Time.time && canJump)
         {
             velocity.y = settings.JumpSpeed;
             jumpBufferedUntil = float.NegativeInfinity;
@@ -102,17 +107,16 @@ public sealed class PlayerMovement : MonoBehaviour
             groundParticles?.PlayJump();
         }
 
-        bool shouldUseFallGravity = velocity.y < 0f
-            || (velocity.y > 0f && jumpAction != null && !jumpAction.IsPressed());
-        body.gravityScale = shouldUseFallGravity
+        body.gravityScale = velocity.y < 0f
             ? settings.GravityScale * settings.FallGravityMultiplier
             : settings.GravityScale;
 
         body.linearVelocity = velocity;
     }
 
-    private bool IsGrounded()
+    private bool IsGrounded(out Rigidbody2D groundBody)
     {
+        groundBody = null;
         Bounds bounds = bodyCollider.bounds;
         Vector2 size = new(
             bounds.size.x * settings.GroundCheckWidthMultiplier,
@@ -127,6 +131,7 @@ public sealed class PlayerMovement : MonoBehaviour
             Collider2D overlap = groundCheckResults[index];
             if (overlap != null && overlap.attachedRigidbody != body)
             {
+                groundBody = overlap.attachedRigidbody;
                 return true;
             }
         }
