@@ -13,6 +13,7 @@ public sealed class PlayerGroundParticles : MonoBehaviour
     private static readonly Color LightPlatformColor = new Color(1f, 248f / 255f, 238f / 255f, 0.72f);
 
     private readonly DustParticle[] particles = new DustParticle[PoolSize];
+    private GameObject particleRoot;
     private Sprite dustSprite;
     private float footY;
     private float footCenterX;
@@ -66,9 +67,11 @@ public sealed class PlayerGroundParticles : MonoBehaviour
             sortingOrder = Mathf.Max(sortingOrder, bodyRenderer.sortingOrder);
         }
 
+        particleRoot = new GameObject($"{name} Ground Particles");
         for (int index = 0; index < particles.Length; index++)
         {
             GameObject particleObject = new GameObject("FootDust");
+            particleObject.transform.SetParent(particleRoot.transform, false);
             SpriteRenderer renderer = particleObject.AddComponent<SpriteRenderer>();
             renderer.sprite = dustSprite;
             renderer.sortingLayerID = sortingLayerId;
@@ -142,12 +145,9 @@ public sealed class PlayerGroundParticles : MonoBehaviour
 
     private void OnDestroy()
     {
-        foreach (DustParticle particle in particles)
+        if (particleRoot != null)
         {
-            if (particle.transform != null)
-            {
-                Destroy(particle.transform.gameObject);
-            }
+            Destroy(particleRoot);
         }
 
         if (dustSprite != null)
