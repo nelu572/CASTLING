@@ -286,12 +286,23 @@ public sealed class PlayerGroundParticles : MonoBehaviour
 
         Vector3Int cell = tilemap.WorldToCell(groundHit.point - groundHit.normal * 0.08f);
         Sprite surfaceSprite = tilemap.GetSprite(cell);
-        if (surfaceSprite == null || surfaceSprite.texture.name != "TileMap_Main")
+        if (surfaceSprite == null || !surfaceSprite.name.StartsWith("TileMap_Main_", System.StringComparison.Ordinal))
         {
             return DarkPlatformColor;
         }
 
-        bool isDarkTile = surfaceSprite.textureRect.center.y > surfaceSprite.texture.height * 0.5f;
+        // Preserve the original surface colours after moving sprites to separate sheets.
+        bool isDarkTile;
+        switch (surfaceSprite.texture.name)
+        {
+            case "PlatformTiles_Dark": isDarkTile = true; break;
+            case "PlatformTiles_Ivory": isDarkTile = false; break;
+            case "TileMap_Main":
+                isDarkTile = surfaceSprite.textureRect.center.y > surfaceSprite.texture.height * 0.5f;
+                break;
+            default: return DarkPlatformColor;
+        }
+
         return (isDarkTile ? DarkPlatformColor : LightPlatformColor)
             * tilemap.color * tilemap.GetColor(cell);
     }

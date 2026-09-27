@@ -1,0 +1,39 @@
+var root=new GameObject("AutoBorderVerification");root.hideFlags=HideFlags.HideAndDontSave;root.AddComponent<Grid>();root.transform.position=new Vector3(200,0,0);
+var aGo=new GameObject("A");aGo.transform.SetParent(root.transform,false);var map=aGo.AddComponent<UnityEngine.Tilemaps.Tilemap>();aGo.AddComponent<UnityEngine.Tilemaps.TilemapRenderer>();aGo.AddComponent<UnityEngine.Tilemaps.TilemapCollider2D>();
+var bGo=new GameObject("B");bGo.transform.SetParent(root.transform,false);var other=bGo.AddComponent<UnityEngine.Tilemaps.Tilemap>();bGo.AddComponent<UnityEngine.Tilemaps.TilemapCollider2D>();bGo.transform.localPosition=new Vector3(0,3,0);
+var assets=AssetDatabase.FindAssets("t:PlatformTileLibrary",new[]{"Assets/TilePalette/Main/Tiles"}).SelectMany(g=>AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GUIDToAssetPath(g))).OfType<PlatformBorderTile>().ToArray();
+var dark=assets.First(t=>t.name=="Dark_Square");var ivory=assets.First(t=>t.name=="Ivory_Square");
+var dirs=new[]{Vector3Int.up,Vector3Int.right,Vector3Int.down,Vector3Int.left};int cases=0,fail=0;var errors=new System.Text.StringBuilder();
+System.Action<bool,string> check=(ok,s)=>{cases++;if(!ok){fail++;if(fail<15)errors.AppendLine(s);}};
+var brush=ScriptableObject.CreateInstance<UnityEditor.Tilemaps.GridBrush>();
+try{
+foreach(var square in new[]{dark,ivory})for(int mask=0;mask<16;mask++){
+map.ClearAllTiles();other.ClearAllTiles();map.SetTile(Vector3Int.zero,square);
+for(int d=0;d<4;d++)if((mask&(1<<d))==0)other.SetTile(dirs[d]-new Vector3Int(0,3,0),square==dark?ivory:dark);
+map.RefreshAllTiles();int partial;check((square.ResolveMask(map,Vector3Int.zero,out partial)&15)==mask&&partial==0,"Cross-map mask "+mask);
+check(map.GetSprite(Vector3Int.zero)==square.variants[mask].sprite,"Cross-map sprite "+mask);
+}
+other.ClearAllTiles();
+foreach(var tile in assets.Where(t=>!t.square))for(int rotation=0;rotation<4;rotation++)for(int flip=0;flip<2;flip++){
+map.ClearAllTiles();var transform=Matrix4x4.Rotate(Quaternion.Euler(0,0,rotation*90))*Matrix4x4.Scale(new Vector3(flip==0?1:-1,1,1));
+brush.Init(Vector3Int.one);brush.cells[0].tile=tile;brush.cells[0].matrix=transform;brush.Paint(root.GetComponent<Grid>(),aGo,Vector3Int.zero);map.RefreshAllTiles();
+check(map.GetTransformMatrix(Vector3Int.zero)==transform,"Brush transform "+tile.name);
+check(map.GetSprite(Vector3Int.zero)==tile.variants[31].sprite,"Exposed curve "+tile.name);
+foreach(var d in dirs)map.SetTile(d,ivory);map.RefreshAllTiles();int partial;int mask=tile.ResolveMask(map,Vector3Int.zero,out partial);
+check(partial==0&&map.GetSprite(Vector3Int.zero)==tile.variants[mask].sprite,"Connected curve "+tile.name);
+foreach(var d in dirs)brush.Erase(root.GetComponent<Grid>(),aGo,d);
+map.RefreshAllTiles();check(map.GetSprite(Vector3Int.zero)==tile.variants[31].sprite,"Erase refresh "+tile.name);
+}
+map.ClearAllTiles();
+var slim=assets.First(t=>t.name=="Ivory_SlimStraight_x0_y0");
+map.SetTile(Vector3Int.zero,dark);map.SetTile(Vector3Int.right,slim);map.RefreshAllTiles();
+int partialJoin;var partialMask=dark.ResolveMask(map,Vector3Int.zero,out partialJoin);
+check(partialJoin==1&&(partialMask&2)!=0,"Partial join must retain exposed line");
+map.ClearAllTiles();other.ClearAllTiles();map.SetTile(Vector3Int.zero,dark);
+Undo.IncrementCurrentGroup();Undo.RegisterCompleteObjectUndo(map,"Verify automatic border undo");
+map.SetTile(Vector3Int.right,ivory);map.RefreshAllTiles();int pp;
+check((dark.ResolveMask(map,Vector3Int.zero,out pp)&2)==0,"Joined before undo");
+Undo.PerformUndo();map.RefreshAllTiles();check(map.GetTile(Vector3Int.right)==null&&(dark.ResolveMask(map,Vector3Int.zero,out pp)&2)!=0,"Undo restores edge");
+Undo.PerformRedo();map.RefreshAllTiles();check(map.GetTile(Vector3Int.right)==ivory&&(dark.ResolveMask(map,Vector3Int.zero,out pp)&2)==0,"Redo restores join");Undo.ClearUndo(map);
+return new{cases=cases,failures=fail,errors=errors.ToString()};
+}finally{UnityEngine.Object.DestroyImmediate(brush);UnityEngine.Object.DestroyImmediate(root);}
