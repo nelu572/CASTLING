@@ -11,6 +11,15 @@
 
 Unity Tile Palette에서 **AutoPlatforms_TilePalette**를 선택한다. 왼쪽 검정, 오른쪽 아이보리다.
 
+팔레트 5개는 서로 다른 타일을 포함하므로 역할별로 유지한다. 팔레트는 편집용 프리팹이며 실제 지형 타일은 아래 라이브러리 4개에 저장된다.
+
+| 팔레트 | 용도 |
+| --- | --- |
+| AutoPlatforms_TilePalette | 자동 사각 지형과 자동 곡선 |
+| Curves_TilePalette | 수동 곡선 부품 |
+| MainMap_TilePalette | 기존 기본 타일과 안쪽 꼭짓점 마감 |
+| CurveBorders_Dark / CurveBorders_Ivory | 검정·아이보리 수동 외곽선 조합 |
+
 - 사각 지형은 맨 아래 `Square` 한 칸을 집어 칠한다.
 - 곡선·아치는 원하는 형태의 묶음 전체를 집어 칠한다. 빈 칸도 선택 영역에 포함한다.
 - 회전·뒤집기는 기본 GridBrush를 사용한다. 크기는 부품 종류로 고르고 Transform Scale로 늘리지 않는다.
@@ -51,6 +60,8 @@ T=위, R=오른쪽, B=아래, L=왼쪽, C=곡선이다. None은 선 없음이다
 
 각 형태의 외곽선 32조합은 **8열 × 4줄**로 배치했다. `T=1, R=2, B=4, L=8, C=16`을 합한 값이 왼쪽부터 0~7, 다음 줄 8~15, 16~23, 24~31 순서다. None은 첫 줄 첫 번째, C는 세 번째 줄 첫 번째, TLC는 네 번째 줄 두 번째, 전체 경계는 마지막이다. 회전하면 방향도 함께 회전한다.
 
+각 형태마다 32개 이름을 반복 표시하는 TextMesh 라벨은 팔레트에서 멀리 스크롤한 뒤에도 조합을 찾기 위한 것이다. 검정·아이보리 팔레트에 각각 462개가 있으며, 타일이나 게임 오브젝트의 중복본은 아니다.
+
 형태는 위에서부터 OuterSmall, OuterR1, OuterR2, InnerR1, InnerR2, InnerR3, RoundCap, RoundIsolated, SlimStraight, SlimCap, SlimIsolated, ArchR1, ArchR2, ArchR3 순서다. 부품 사이에는 한 칸 여백을 두고 크기에 맞춰 간격을 줄였다. 수동 외곽선 팔레트의 가로 폭은 190칸에서 39칸으로 줄었다.
 
 자동 팔레트는 40×42칸, 수동 곡선 팔레트는 40×44칸이다. 기본 팔레트는 큰 스프라이트의 실제 표시 크기를 고려해 기존 27×35칸 배치 아래에 꼭짓점 마감 두 행을 추가했다. 기존 타일·회전·색·묶음 내부 배치는 유지했다.
@@ -77,5 +88,7 @@ T=위, R=오른쪽, B=아래, L=왼쪽, C=곡선이다. None은 선 없음이다
 기존 수동 타일로 남아 있던 접합부 7곳도 같은 외곽선·충돌을 가진 자동 Square로 교체했다. Ground의 (-11, -6), (-9, -6) 흑백 T자 접합부가 포함된다. 큰 아치가 이미 덮고 있는 모서리는 제외했다. 자동 타일은 총 586칸이며 충돌 경계 비교 37,504곳에서 불일치가 없었다.
 
 Unity MCP에서 다시 실행할 검증 본문:
-- [자동 연결·브러시·Undo/Redo](VerifyAutomaticBorders.cs.txt)
-- [실제 씬 충돌 경계 비교](VerifyAutomaticCollision.cs.txt)
+- [자동 연결·브러시·Undo/Redo](verification/VerifyAutomaticBorders.cs.txt)
+- [실제 씬 충돌 경계 비교](verification/VerifyAutomaticCollision.cs.txt)
+
+두 `.cs.txt` 파일은 Unity MCP `execute_code`에 넣는 검사 본문이며 게임 코드나 Unity Test Runner 테스트 에셋은 아니다.
