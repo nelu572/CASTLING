@@ -8,6 +8,8 @@ public sealed class PlatformBorderTile : TileBase
     public Tile[] variants = new Tile[32];
     public Sprite shape;
     public bool square;
+    // Square joins: edge bits T/R/B/L, then corner bits TR/BR/BL/TL.
+    public Tile[] cornerVariants = new Tile[0];
 
     private static readonly Vector2[] Directions = { Vector2.up, Vector2.right, Vector2.down, Vector2.left };
     private static readonly Dictionary<Sprite, Vector2[][]> Polygons = new Dictionary<Sprite, Vector2[][]>();
@@ -20,6 +22,13 @@ public sealed class PlatformBorderTile : TileBase
         int partial;
         int mask = map == null ? 31 : ResolveMask(map, position, out partial);
         var tile = variants[mask];
+        if (square && map != null)
+        {
+            int corners = ResolveCorners(map, position, mask);
+            int index = (mask & 15) | (corners << 4);
+            if (corners != 0 && index < cornerVariants.Length && cornerVariants[index] != null)
+                tile = cornerVariants[index];
+        }
         if (tile == null) return;
         data.sprite = tile.sprite;
         data.color = Color.white;
@@ -58,6 +67,24 @@ public sealed class PlatformBorderTile : TileBase
             else if (covered > 0) partialEdges++;
         }
         return mask;
+    }
+
+    public int ResolveCorners(Tilemap map, Vector3Int position, int edgeMask)
+    {
+        if (!square) return 0;
+        int corners = 0;
+        var matrix = CellMatrix(map, position, true);
+        var maps = ConnectedMaps(map);
+        for (int corner = 0; corner < 4; corner++)
+        {
+            int next = (corner + 1) % 4;
+            if ((edgeMask & ((1 << corner) | (1 << next))) != 0) continue;
+            var diagonal = Directions[corner] + Directions[next];
+            // Two joined sides with an empty diagonal form a concave corner.
+            var outside = matrix.MultiplyPoint3x4(diagonal * .502f);
+            if (!Occupied(maps, map, position, outside)) corners |= 1 << corner;
+        }
+        return corners;
     }
 
     public static Tilemap[] ConnectedMaps(Tilemap map)

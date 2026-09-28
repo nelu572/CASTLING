@@ -28103,6 +28103,812 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C1
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 84edf0db9902cec418b251703ebed17c
+      internalID: 1986633903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C2
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ccd2fa950efcec45a2e4d5be2b9d239
+      internalID: -172735150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C3
+      rect:
+        serializedVersion: 2
+        x: 266
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: b501ccc8b0e1b9441b2c3989fcee3d44
+      internalID: 896131710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C4
+      rect:
+        serializedVersion: 2
+        x: 398
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d0ea1fe4c528174cb9889a87e7f0333
+      internalID: 1507339249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C5
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 657c4d65e16ea7a42b2262903a502262
+      internalID: 1256991721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C6
+      rect:
+        serializedVersion: 2
+        x: 662
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3c0a291a16a3ad74288a7bd39070ced9
+      internalID: -1985791403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C7
+      rect:
+        serializedVersion: 2
+        x: 794
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: d8b1023a27e957248a09a1a96709119f
+      internalID: 1575324477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C8
+      rect:
+        serializedVersion: 2
+        x: 926
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96e19f83393468a4eae3b37b3090fd96
+      internalID: 978639779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C9
+      rect:
+        serializedVersion: 2
+        x: 1058
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: e646957503b96024faa995c2602594c5
+      internalID: 192385355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C10
+      rect:
+        serializedVersion: 2
+        x: 1190
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: d84174793a6e92c418c676a5b6e71016
+      internalID: -847712820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C11
+      rect:
+        serializedVersion: 2
+        x: 1322
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4c67defef27f69545a4b73ff679c00f1
+      internalID: -1816543356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C12
+      rect:
+        serializedVersion: 2
+        x: 1454
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9783b400d2436674482afb0e78063eb8
+      internalID: -434394373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C13
+      rect:
+        serializedVersion: 2
+        x: 1586
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf573063a436e1f48870ea81420159c3
+      internalID: -1164140374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C14
+      rect:
+        serializedVersion: 2
+        x: 1718
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01e8c5a8ee13fdf4a8306eb791c1e6b2
+      internalID: -390789467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E0_C15
+      rect:
+        serializedVersion: 2
+        x: 1850
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: c0a327ddd1a78f443b6c50f4a8b187e2
+      internalID: 1059190060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E1_C2
+      rect:
+        serializedVersion: 2
+        x: 1982
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 56980a0ab3e033046b1fad5fef40f2f0
+      internalID: 632999914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E1_C4
+      rect:
+        serializedVersion: 2
+        x: 2114
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 455eb4f773de694469a6c83ed688ae72
+      internalID: 1888587040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E1_C6
+      rect:
+        serializedVersion: 2
+        x: 2246
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: f97e3777cd51e664b8dd14d0fbceb31e
+      internalID: 560132055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E2_C4
+      rect:
+        serializedVersion: 2
+        x: 2378
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36a5d383065d59447a3397b01b7f18d1
+      internalID: -530705571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E2_C8
+      rect:
+        serializedVersion: 2
+        x: 2510
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ee809b8bce0d2340ab3feb12ae5e2d9
+      internalID: -512395493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E2_C12
+      rect:
+        serializedVersion: 2
+        x: 2642
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 758690405b70ab34288cdb614a439949
+      internalID: -1207391280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E3_C4
+      rect:
+        serializedVersion: 2
+        x: 2774
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 22fad8f5f4811914b9d40c2c3b566ebb
+      internalID: 2133892817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E4_C1
+      rect:
+        serializedVersion: 2
+        x: 2906
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: fba7c43df57941d4b9184cc367f6258b
+      internalID: 643411021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E4_C8
+      rect:
+        serializedVersion: 2
+        x: 3038
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: d6c6feea7c1a3ae4cbc8a1a73ef3f794
+      internalID: 183899041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E4_C9
+      rect:
+        serializedVersion: 2
+        x: 3170
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 88bc638e8e82b574aa5b26d75aa90141
+      internalID: -1028236025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E6_C8
+      rect:
+        serializedVersion: 2
+        x: 3302
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f3629a1f1687af478b675ae58a2962e
+      internalID: 1673071197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E8_C1
+      rect:
+        serializedVersion: 2
+        x: 3434
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16de9a887fdb2334fba267cf02fee4ae
+      internalID: 214838313
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E8_C2
+      rect:
+        serializedVersion: 2
+        x: 3566
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d3e76a1664b9d34bb7665324a4636b1
+      internalID: 2077491901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E8_C3
+      rect:
+        serializedVersion: 2
+        x: 3698
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42be29e0dd9b35b459d0622e7bdf9637
+      internalID: 710451287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E9_C2
+      rect:
+        serializedVersion: 2
+        x: 3830
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: db9aff673bfebb842a92c252fd560a4c
+      internalID: -1703716641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ivory_Square_E12_C1
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 2418
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: ed7c03269ecad3941bf5e634c19b38cb
+      internalID: -1197840458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -28486,6 +29292,37 @@ TextureImporter:
       Ivory_SlimStraight_TR_x0_y0: -1780742661
       Ivory_SlimStraight_T_x0_y0: 704797793
       Ivory_SlimStraight_x0_y0: 1855343007
+      Ivory_Square_E0_C1: 1986633903
+      Ivory_Square_E0_C10: -847712820
+      Ivory_Square_E0_C11: -1816543356
+      Ivory_Square_E0_C12: -434394373
+      Ivory_Square_E0_C13: -1164140374
+      Ivory_Square_E0_C14: -390789467
+      Ivory_Square_E0_C15: 1059190060
+      Ivory_Square_E0_C2: -172735150
+      Ivory_Square_E0_C3: 896131710
+      Ivory_Square_E0_C4: 1507339249
+      Ivory_Square_E0_C5: 1256991721
+      Ivory_Square_E0_C6: -1985791403
+      Ivory_Square_E0_C7: 1575324477
+      Ivory_Square_E0_C8: 978639779
+      Ivory_Square_E0_C9: 192385355
+      Ivory_Square_E12_C1: -1197840458
+      Ivory_Square_E1_C2: 632999914
+      Ivory_Square_E1_C4: 1888587040
+      Ivory_Square_E1_C6: 560132055
+      Ivory_Square_E2_C12: -1207391280
+      Ivory_Square_E2_C4: -530705571
+      Ivory_Square_E2_C8: -512395493
+      Ivory_Square_E3_C4: 2133892817
+      Ivory_Square_E4_C1: 643411021
+      Ivory_Square_E4_C8: 183899041
+      Ivory_Square_E4_C9: -1028236025
+      Ivory_Square_E6_C8: 1673071197
+      Ivory_Square_E8_C1: 214838313
+      Ivory_Square_E8_C2: 2077491901
+      Ivory_Square_E8_C3: 710451287
+      Ivory_Square_E9_C2: -1703716641
       TileMap_IvoryCap: 1366901891
       TileMap_IvoryIsolated: 1447317604
       TileMap_IvoryOuterCorner: -1660021203

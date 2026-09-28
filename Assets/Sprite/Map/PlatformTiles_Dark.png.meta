@@ -28289,6 +28289,812 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C1
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 952e0a10a664eba469b0110dd02fcc8f
+      internalID: 305836988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C2
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3029b96fb762d684da86b56f0e43f158
+      internalID: 837676525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C3
+      rect:
+        serializedVersion: 2
+        x: 266
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: d3277478307bf0d40b36916fc8c20cc9
+      internalID: -1665516170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C4
+      rect:
+        serializedVersion: 2
+        x: 398
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 53054566dea664a4f9788372706caf83
+      internalID: -157761136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C5
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: f9fdd1203f3367645a057d2af414dd32
+      internalID: 1416742990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C6
+      rect:
+        serializedVersion: 2
+        x: 662
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 372519b3ce0298646b0104624b5c168a
+      internalID: -1474228351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C7
+      rect:
+        serializedVersion: 2
+        x: 794
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 07bb8e1cb32cf494896c374376cccf50
+      internalID: 562077388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C8
+      rect:
+        serializedVersion: 2
+        x: 926
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: d4af84ac985f84d4593d1d2ab2a17917
+      internalID: -1290426918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C9
+      rect:
+        serializedVersion: 2
+        x: 1058
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 659b877407bdb424e8dcb7f1b4e6af40
+      internalID: -813027917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C10
+      rect:
+        serializedVersion: 2
+        x: 1190
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8da3ea185aa464a47a83993d574b7699
+      internalID: 1211868019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C11
+      rect:
+        serializedVersion: 2
+        x: 1322
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 521d4be3be06e464b8093d8cd4d3f7a0
+      internalID: 899364152
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C12
+      rect:
+        serializedVersion: 2
+        x: 1454
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1eb909c763562df4fb70ec21f8c82f43
+      internalID: 1862908719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C13
+      rect:
+        serializedVersion: 2
+        x: 1586
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 57b6537a631dbc84893c9c076786d9c4
+      internalID: -1402380463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C14
+      rect:
+        serializedVersion: 2
+        x: 1718
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: b39d4df0f14711f4e93f2905117db420
+      internalID: 1607853431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E0_C15
+      rect:
+        serializedVersion: 2
+        x: 1850
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71175ec23361aa24c8edfdbb4e120f6f
+      internalID: -874268096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E1_C2
+      rect:
+        serializedVersion: 2
+        x: 1982
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31cc5d5cf47814246aace65e6b1e6796
+      internalID: 454074576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E1_C4
+      rect:
+        serializedVersion: 2
+        x: 2114
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: eec20ce3619e691448a0060370b97334
+      internalID: 2129897907
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E1_C6
+      rect:
+        serializedVersion: 2
+        x: 2246
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8278ee95bd3fde041bd858e5f1a6d6a5
+      internalID: 287295953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E2_C4
+      rect:
+        serializedVersion: 2
+        x: 2378
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: f647f55c1801d41408f7980b0a1e9b09
+      internalID: 1270789586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E2_C8
+      rect:
+        serializedVersion: 2
+        x: 2510
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 785543d1a3d318a479102526fca4648f
+      internalID: -884752003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E2_C12
+      rect:
+        serializedVersion: 2
+        x: 2642
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c55b5edf968aa44eb58ade82cd501f5
+      internalID: 699848433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E3_C4
+      rect:
+        serializedVersion: 2
+        x: 2774
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75171573c6706154dab105a0fb5a76eb
+      internalID: -1549506879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E4_C1
+      rect:
+        serializedVersion: 2
+        x: 2906
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b4d7e175f24f024eae74bb557b17f0a
+      internalID: 1149005819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E4_C8
+      rect:
+        serializedVersion: 2
+        x: 3038
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 301636751a6c60a47bacd207d3ffbe0a
+      internalID: 644937496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E4_C9
+      rect:
+        serializedVersion: 2
+        x: 3170
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 82087bc760004294b87640b7eb06e99b
+      internalID: 1477634599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E6_C8
+      rect:
+        serializedVersion: 2
+        x: 3302
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+        - {x: 64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6cf44ab5fc427454cb79f56232c93f57
+      internalID: -1686432866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E8_C1
+      rect:
+        serializedVersion: 2
+        x: 3434
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b5cfed5cc3e5004584b0cb8f0f78e8a
+      internalID: 108396951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E8_C2
+      rect:
+        serializedVersion: 2
+        x: 3566
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: 347fb33ecb97e7c4baea8c6caa59168d
+      internalID: 1966224526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E8_C3
+      rect:
+        serializedVersion: 2
+        x: 3698
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: c846f6f09f4fe35478fd473b6b6b4b64
+      internalID: -1290224936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E9_C2
+      rect:
+        serializedVersion: 2
+        x: 3830
+        y: 2286
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: -64, y: -64}
+        - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: e8433ae515e712a4e8b0ffc81e469f8f
+      internalID: -1957303088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dark_Square_E12_C1
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 2418
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 64, y: -64}
+        - {x: 64, y: 64}
+        - {x: -64, y: 64}
+        - {x: -64, y: -64}
+      tessellationDetail: 0
+      bones: []
+      spriteID: b91c91b581bbdc842b39d130e17845ba
+      internalID: 1460268555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -28672,6 +29478,37 @@ TextureImporter:
       Dark_SlimStraight_TR_x0_y0: 248238537
       Dark_SlimStraight_T_x0_y0: 525027665
       Dark_SlimStraight_x0_y0: 253585908
+      Dark_Square_E0_C1: 305836988
+      Dark_Square_E0_C10: 1211868019
+      Dark_Square_E0_C11: 899364152
+      Dark_Square_E0_C12: 1862908719
+      Dark_Square_E0_C13: -1402380463
+      Dark_Square_E0_C14: 1607853431
+      Dark_Square_E0_C15: -874268096
+      Dark_Square_E0_C2: 837676525
+      Dark_Square_E0_C3: -1665516170
+      Dark_Square_E0_C4: -157761136
+      Dark_Square_E0_C5: 1416742990
+      Dark_Square_E0_C6: -1474228351
+      Dark_Square_E0_C7: 562077388
+      Dark_Square_E0_C8: -1290426918
+      Dark_Square_E0_C9: -813027917
+      Dark_Square_E12_C1: 1460268555
+      Dark_Square_E1_C2: 454074576
+      Dark_Square_E1_C4: 2129897907
+      Dark_Square_E1_C6: 287295953
+      Dark_Square_E2_C12: 699848433
+      Dark_Square_E2_C4: 1270789586
+      Dark_Square_E2_C8: -884752003
+      Dark_Square_E3_C4: -1549506879
+      Dark_Square_E4_C1: 1149005819
+      Dark_Square_E4_C8: 644937496
+      Dark_Square_E4_C9: 1477634599
+      Dark_Square_E6_C8: -1686432866
+      Dark_Square_E8_C1: 108396951
+      Dark_Square_E8_C2: 1966224526
+      Dark_Square_E8_C3: -1290224936
+      Dark_Square_E9_C2: -1957303088
       TileMap_DarkArchFoot: 109411417
       TileMap_DarkArchSide: -60403141
       TileMap_DarkCap: 847980445

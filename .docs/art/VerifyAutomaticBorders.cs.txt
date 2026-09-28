@@ -10,9 +10,32 @@ try{
 foreach(var square in new[]{dark,ivory})for(int mask=0;mask<16;mask++){
 map.ClearAllTiles();other.ClearAllTiles();map.SetTile(Vector3Int.zero,square);
 for(int d=0;d<4;d++)if((mask&(1<<d))==0)other.SetTile(dirs[d]-new Vector3Int(0,3,0),square==dark?ivory:dark);
+for(int d=0;d<4;d++)other.SetTile(dirs[d]+dirs[(d+1)%4]-new Vector3Int(0,3,0),square==dark?ivory:dark);
 map.RefreshAllTiles();int partial;check((square.ResolveMask(map,Vector3Int.zero,out partial)&15)==mask&&partial==0,"Cross-map mask "+mask);
 check(map.GetSprite(Vector3Int.zero)==square.variants[mask].sprite,"Cross-map sprite "+mask);
 }
+// All 256 neighbourhoods in both colours, within one map and across maps.
+var offsets=new[]{Vector3Int.up,Vector3Int.right,Vector3Int.down,Vector3Int.left,new Vector3Int(1,1,0),new Vector3Int(1,-1,0),new Vector3Int(-1,-1,0),new Vector3Int(-1,1,0)};
+foreach(var square in new[]{dark,ivory})for(int cross=0;cross<2;cross++)for(int neighbours=0;neighbours<256;neighbours++){
+map.ClearAllTiles();other.ClearAllTiles();map.SetTile(Vector3Int.zero,square);
+for(int n=0;n<8;n++)if((neighbours&(1<<n))!=0){var target=cross==1?other:map;target.SetTile(offsets[n]-(cross==1?new Vector3Int(0,3,0):Vector3Int.zero),square==dark?ivory:dark);}
+int edges=(~neighbours)&15,corners=0;
+for(int c=0;c<4;c++)if((neighbours&(1<<c))!=0&&(neighbours&(1<<((c+1)%4)))!=0&&(neighbours&(1<<(c+4)))==0)corners|=1<<c;
+map.RefreshAllTiles();int partial;
+check((square.ResolveMask(map,Vector3Int.zero,out partial)&15)==edges,"Corner test edges "+neighbours);
+check(square.ResolveCorners(map,Vector3Int.zero,edges)==corners,"Corner mask "+neighbours);
+var expected=corners==0?square.variants[edges]:square.cornerVariants[edges|(corners<<4)];
+check(expected!=null&&map.GetSprite(Vector3Int.zero)==expected.sprite,"Corner sprite "+neighbours);
+check(expected!=null&&map.GetTransformMatrix(Vector3Int.zero)==expected.transform,"Corner transform "+neighbours);
+}
+// Filling and erasing just the diagonal must refresh the centre without manual refresh.
+map.ClearAllTiles();other.ClearAllTiles();map.SetTile(Vector3Int.zero,dark);
+map.SetTile(Vector3Int.up,ivory);map.SetTile(Vector3Int.right,ivory);
+var openJoin=map.GetSprite(Vector3Int.zero);
+map.SetTile(new Vector3Int(1,1,0),ivory);
+check(map.GetSprite(Vector3Int.zero)!=openJoin,"Diagonal fill refresh");
+map.SetTile(new Vector3Int(1,1,0),null);
+check(map.GetSprite(Vector3Int.zero)==openJoin,"Diagonal erase refresh");
 other.ClearAllTiles();
 foreach(var tile in assets.Where(t=>!t.square))for(int rotation=0;rotation<4;rotation++)for(int flip=0;flip<2;flip++){
 map.ClearAllTiles();var transform=Matrix4x4.Rotate(Quaternion.Euler(0,0,rotation*90))*Matrix4x4.Scale(new Vector3(flip==0?1:-1,1,1));
