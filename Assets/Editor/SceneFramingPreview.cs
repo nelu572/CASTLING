@@ -17,6 +17,7 @@ internal static class SceneFramingPreview
         public Transform Transform;
         public Vector3 WorldPosition;
         public Vector3 LocalPosition;
+        public Vector3 CameraOrigin;
         public BackgroundParallax Parallax;
     }
 
@@ -114,11 +115,14 @@ internal static class SceneFramingPreview
         foreach (BackgroundParallax parallax in Object.FindObjectsByType<BackgroundParallax>(FindObjectsSortMode.None))
         {
             if (!parallax.isActiveAndEnabled || parallax.gameObject.scene != scene) continue;
+            Transform originReference = new SerializedObject(parallax)
+                .FindProperty("cameraOriginReference").objectReferenceValue as Transform;
             Layers.Add(new Layer
             {
                 Transform = parallax.transform,
                 WorldPosition = parallax.transform.position,
                 LocalPosition = parallax.transform.localPosition,
+                CameraOrigin = originReference != null ? originReference.position : cameraOrigin,
                 Parallax = parallax
             });
         }
@@ -160,10 +164,10 @@ internal static class SceneFramingPreview
             camera.orthographicSize = size;
         }
 
-        Vector3 delta = position - cameraOrigin;
         foreach (Layer layer in Layers)
         {
             if (layer.Transform == null || layer.Parallax == null) continue;
+            Vector3 delta = position - layer.CameraOrigin;
             SerializedObject properties = new SerializedObject(layer.Parallax);
             float horizontalRatio = properties.FindProperty("horizontalScrollRatio").floatValue;
             float verticalRatio = properties.FindProperty("verticalScrollRatio").floatValue;

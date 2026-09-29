@@ -5,6 +5,7 @@ using UnityEngine;
 public sealed class BackgroundParallax : MonoBehaviour
 {
     [SerializeField] private Camera targetCamera;
+    [SerializeField] private Transform cameraOriginReference;
     [Tooltip("Screen scroll relative to terrain: 0 stays on screen, 1 moves with terrain.")]
     [SerializeField, Range(0f, 1f)] private float horizontalScrollRatio = 0.35f;
     [SerializeField, Range(0f, 1f)] private float verticalScrollRatio = 0.35f;
@@ -18,7 +19,11 @@ public sealed class BackgroundParallax : MonoBehaviour
     {
         initialLocalPosition = transform.localPosition;
         initialWorldPosition = transform.position;
-        hasCameraOrigin = false;
+        hasCameraOrigin = cameraOriginReference != null;
+        if (hasCameraOrigin)
+        {
+            cameraOrigin = cameraOriginReference.position;
+        }
         CinemachineCore.CameraUpdatedEvent.AddListener(OnCameraUpdated);
     }
 
