@@ -27,6 +27,7 @@ internal static class SceneFramingPreview
     private static Camera camera;
     private static CinemachineBrain brain;
     private static CinemachineTargetGroup group;
+    private static CinemachineCamera virtualCamera;
     private static CinemachineGroupFraming framing;
     private static CinemachinePositionComposer composer;
     private static CinemachineConfiner2D confiner;
@@ -76,7 +77,8 @@ internal static class SceneFramingPreview
         }
 
         if (!AnimationMode.InAnimationMode(driver) || scene != previewScene ||
-            camera == null || group == null || confiner == null)
+            camera == null || group == null || confiner == null ||
+            virtualCamera != FindCameraForGroup(group))
         {
             Stop();
             return;
@@ -85,13 +87,33 @@ internal static class SceneFramingPreview
         Apply();
     }
 
+    private static CinemachineCamera FindCameraForGroup(CinemachineTargetGroup targetGroup)
+    {
+        if (targetGroup == null) return null;
+
+        CinemachineCamera fallback = null;
+        float targetX = targetGroup.transform.position.x;
+        foreach (CinemachineCamera candidate in Object.FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None))
+        {
+            if (!candidate.isActiveAndEnabled || candidate.Follow != targetGroup.transform) continue;
+            if (fallback == null || candidate.Priority.Value > fallback.Priority.Value) fallback = candidate;
+
+            CinemachineConfiner2D candidateConfiner = candidate.GetComponent<CinemachineConfiner2D>();
+            if (candidateConfiner == null || candidateConfiner.BoundingShape2D == null) continue;
+            Bounds bounds = candidateConfiner.BoundingShape2D.bounds;
+            if (targetX >= bounds.min.x && targetX <= bounds.max.x) return candidate;
+        }
+
+        return fallback;
+    }
+
     private static bool TryStart(Scene scene)
     {
         camera = Camera.main;
         brain = camera != null ? camera.GetComponent<CinemachineBrain>() : null;
         CameraFramingFloor floor = Object.FindFirstObjectByType<CameraFramingFloor>();
         group = floor != null ? floor.GetComponent<CinemachineTargetGroup>() : null;
-        CinemachineCamera virtualCamera = Object.FindFirstObjectByType<CinemachineCamera>();
+        virtualCamera = FindCameraForGroup(group);
         framing = virtualCamera != null ? virtualCamera.GetComponent<CinemachineGroupFraming>() : null;
         composer = virtualCamera != null ? virtualCamera.GetComponent<CinemachinePositionComposer>() : null;
         confiner = virtualCamera != null ? virtualCamera.GetComponent<CinemachineConfiner2D>() : null;
@@ -117,6 +139,8 @@ internal static class SceneFramingPreview
             if (!parallax.isActiveAndEnabled || parallax.gameObject.scene != scene) continue;
             Transform originReference = new SerializedObject(parallax)
                 .FindProperty("cameraOriginReference").objectReferenceValue as Transform;
+            if (originReference != null &&
+                !confiner.BoundingShape2D.bounds.Contains(originReference.position)) continue;
             Layers.Add(new Layer
             {
                 Transform = parallax.transform,
@@ -275,6 +299,7 @@ internal static class SceneFramingPreview
         camera = null;
         brain = null;
         group = null;
+        virtualCamera = null;
         framing = null;
         composer = null;
         confiner = null;

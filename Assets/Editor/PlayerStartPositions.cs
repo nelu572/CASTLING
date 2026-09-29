@@ -18,8 +18,10 @@ internal static class PlayerStartPositions
         new Dictionary<Sprite, Texture2D>();
     private static readonly Dictionary<Sprite, Sprite> OutlineSprites =
         new Dictionary<Sprite, Sprite>();
-    private static SpriteRenderer kingPreview;
-    private static SpriteRenderer rookPreview;
+    private static readonly Dictionary<Transform, SpriteRenderer> Previews =
+        new Dictionary<Transform, SpriteRenderer>();
+    private static readonly HashSet<Transform> VisibleMarkers = new HashSet<Transform>();
+    private static readonly List<Transform> RemovedMarkers = new List<Transform>();
 
     static PlayerStartPositions()
     {
@@ -32,10 +34,11 @@ internal static class PlayerStartPositions
 
     private static void ClearPreviews()
     {
-        if (kingPreview != null) Object.DestroyImmediate(kingPreview.gameObject);
-        if (rookPreview != null) Object.DestroyImmediate(rookPreview.gameObject);
-        kingPreview = null;
-        rookPreview = null;
+        foreach (SpriteRenderer preview in Previews.Values)
+            if (preview != null) Object.DestroyImmediate(preview.gameObject);
+        Previews.Clear();
+        VisibleMarkers.Clear();
+        RemovedMarkers.Clear();
         foreach (Sprite sprite in OutlineSprites.Values)
             if (sprite != null) Object.DestroyImmediate(sprite);
         OutlineSprites.Clear();
@@ -48,15 +51,40 @@ internal static class PlayerStartPositions
     private static void UpdatePreviews()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode ||
-            !TryGetTransforms(out Transform king, out Transform rook,
-                out Transform kingStart, out Transform rookStart))
+            !TryGetTransforms(out Transform king, out Transform rook, out _, out _))
         {
             SetPreviewsEnabled(false);
             return;
         }
 
-        UpdatePreview(ref kingPreview, king, kingStart, "KingStartPreview");
-        UpdatePreview(ref rookPreview, rook, rookStart, "RookStartPreview");
+        VisibleMarkers.Clear();
+        foreach (RoomEntry entry in Object.FindObjectsByType<RoomEntry>(
+                     FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (entry.gameObject.scene != EditorSceneManager.GetActiveScene() || !entry.IsConfigured)
+                continue;
+
+            UpdateEntryPreview(king, entry.KingPoint, entry.name + "_KingStartPreview");
+            UpdateEntryPreview(rook, entry.RookPoint, entry.name + "_RookStartPreview");
+        }
+
+        RemovedMarkers.Clear();
+        foreach (KeyValuePair<Transform, SpriteRenderer> pair in Previews)
+            if (pair.Key == null || !VisibleMarkers.Contains(pair.Key))
+                RemovedMarkers.Add(pair.Key);
+        foreach (Transform marker in RemovedMarkers)
+        {
+            if (Previews[marker] != null) Object.DestroyImmediate(Previews[marker].gameObject);
+            Previews.Remove(marker);
+        }
+    }
+
+    private static void UpdateEntryPreview(Transform player, Transform marker, string name)
+    {
+        VisibleMarkers.Add(marker);
+        Previews.TryGetValue(marker, out SpriteRenderer preview);
+        UpdatePreview(ref preview, player, marker, name);
+        if (preview != null) Previews[marker] = preview;
     }
 
     private static void UpdatePreview(ref SpriteRenderer preview, Transform player,
@@ -194,18 +222,24 @@ internal static class PlayerStartPositions
 
     private static void SetPreviewsEnabled(bool enabled)
     {
-        if (kingPreview != null) kingPreview.enabled = enabled;
-        if (rookPreview != null) rookPreview.enabled = enabled;
+        foreach (SpriteRenderer preview in Previews.Values)
+            if (preview != null) preview.enabled = enabled;
     }
 
     private static void DrawStartHandles(SceneView sceneView)
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode ||
-            !TryGetTransforms(out _, out _, out Transform kingStart, out Transform rookStart))
+            EditorSceneManager.GetActiveScene().name != SceneNames.Development.GameplaySandbox)
             return;
 
-        DrawStartHandle(kingStart);
-        DrawStartHandle(rookStart);
+        foreach (RoomEntry entry in Object.FindObjectsByType<RoomEntry>(
+                     FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (entry.gameObject.scene != EditorSceneManager.GetActiveScene() || !entry.IsConfigured)
+                continue;
+            DrawStartHandle(entry.KingPoint);
+            DrawStartHandle(entry.RookPoint);
+        }
     }
 
     private static void DrawStartHandle(Transform marker)
@@ -215,7 +249,7 @@ internal static class PlayerStartPositions
         EditorGUI.BeginChangeCheck();
         Vector3 moved = Handles.FreeMoveHandle(position, size, Vector3.zero, GhostHandleCap);
         if (EditorGUI.EndChangeCheck())
-            SetStartPosition(marker, new Vector3(moved.x, moved.y, position.z));
+            SetEntryPosition(marker, new Vector3(moved.x, moved.y, position.z));
     }
 
     private static void GhostHandleCap(int controlId, Vector3 position, Quaternion rotation,
@@ -228,15 +262,19 @@ internal static class PlayerStartPositions
     [MenuItem(CoordinatesMenu)]
     private static void ShowCoordinates()
     {
-        EditorWindow.GetWindow<StartPositionCoordinatesWindow>("시작 좌표");
-        FocusSceneView();
+        StartPositionCoordinatesWindow window =
+            EditorWindow.GetWindow<StartPositionCoordinatesWindow>("시작 좌표");
+        window.FocusSelectedEntry();
     }
 
-    internal static void FocusSceneView()
+    internal static void FocusSceneView(RoomEntry entry)
     {
-        if (!TryGetTransforms(out _, out _, out Transform kingStart, out Transform rookStart))
-            return;
+        if (entry == null || !entry.IsConfigured) return;
+        FocusSceneView(entry.KingPoint, entry.RookPoint);
+    }
 
+    private static void FocusSceneView(Transform kingStart, Transform rookStart)
+    {
         SceneView view = SceneView.lastActiveSceneView;
         if (view == null) view = EditorWindow.GetWindow<SceneView>();
 
@@ -252,11 +290,11 @@ internal static class PlayerStartPositions
         view.Repaint();
     }
 
-    internal static void SetStartPosition(Transform marker, Vector3 position)
+    internal static void SetEntryPosition(Transform marker, Vector3 position)
     {
         if (marker.position == position) return;
 
-        Undo.RecordObject(marker, "Move player start position");
+        Undo.RecordObject(marker, "Move room entry position");
         marker.position = position;
         EditorSceneManager.MarkSceneDirty(marker.gameObject.scene);
         SceneView.RepaintAll();
@@ -265,16 +303,27 @@ internal static class PlayerStartPositions
     [MenuItem(RestoreMenu)]
     private static void RestoreStartPositions()
     {
-        if (!TryGetTransforms(out Transform king, out Transform rook,
-                out Transform kingStart, out Transform rookStart)) return;
+        RoomTransitionController transition = Object.FindAnyObjectByType<RoomTransitionController>();
+        MovePlayersToEntry(transition != null ? transition.StartingEntry : null);
+    }
+
+    internal static void MovePlayersToEntry(RoomEntry entry)
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode || entry == null || !entry.IsConfigured ||
+            !TryGetTransforms(out Transform king, out Transform rook, out _, out _)) return;
+
+        Vector3 kingPosition = entry.KingPoint.position;
+        Vector3 rookPosition = entry.RookPoint.position;
+        if (king.position == kingPosition && rook.position == rookPosition) return;
 
         Undo.IncrementCurrentGroup();
-        Undo.RecordObjects(new Object[] { king, rook }, "Restore player start positions");
-        king.position = kingStart.position;
-        rook.position = rookStart.position;
+        Undo.RecordObjects(new Object[] { king, rook }, "Move players to room entry");
+        king.position = kingPosition;
+        rook.position = rookPosition;
         PrefabUtility.RecordPrefabInstancePropertyModifications(king);
         PrefabUtility.RecordPrefabInstancePropertyModifications(rook);
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        SceneView.RepaintAll();
     }
 
     [MenuItem(RestoreMenu, true)]
@@ -297,21 +346,43 @@ internal static class PlayerStartPositions
 
         GameObject kingObject = GameObject.Find("King");
         GameObject rookObject = GameObject.Find("Rook");
-        GameObject markers = GameObject.Find("PlayerStartPositions");
-        if (kingObject == null || rookObject == null || markers == null) return false;
+        RoomTransitionController transition = Object.FindAnyObjectByType<RoomTransitionController>();
+        RoomEntry entry = transition != null ? transition.StartingEntry : null;
+        if (kingObject == null || rookObject == null || entry == null || !entry.IsConfigured)
+            return false;
 
-        kingStart = markers.transform.Find("KingStart");
-        rookStart = markers.transform.Find("RookStart");
-        if (kingStart == null || rookStart == null) return false;
+        kingStart = entry.KingPoint;
+        rookStart = entry.RookPoint;
 
         king = kingObject.transform;
         rook = rookObject.transform;
         return true;
     }
+
+    internal static RoomEntry[] GetSceneEntries()
+    {
+        if (EditorSceneManager.GetActiveScene().name != SceneNames.Development.GameplaySandbox)
+            return new RoomEntry[0];
+
+        var entries = new List<RoomEntry>();
+        foreach (RoomEntry entry in Object.FindObjectsByType<RoomEntry>(
+                     FindObjectsInactive.Include, FindObjectsSortMode.None))
+            if (entry.gameObject.scene == EditorSceneManager.GetActiveScene() && entry.IsConfigured)
+                entries.Add(entry);
+
+        entries.Sort((a, b) =>
+        {
+            int roomOrder = string.CompareOrdinal(a.Room.name, b.Room.name);
+            return roomOrder != 0 ? roomOrder : string.CompareOrdinal(a.name, b.name);
+        });
+        return entries.ToArray();
+    }
 }
 
 internal sealed class StartPositionCoordinatesWindow : EditorWindow
 {
+    [SerializeField] private RoomEntry selectedEntry;
+
     private void OnInspectorUpdate()
     {
         Repaint();
@@ -319,18 +390,57 @@ internal sealed class StartPositionCoordinatesWindow : EditorWindow
 
     private void OnGUI()
     {
-        if (!PlayerStartPositions.TryGetTransforms(out _, out _,
-                out Transform kingStart, out Transform rookStart))
+        RoomEntry[] entries = PlayerStartPositions.GetSceneEntries();
+        if (entries.Length == 0)
         {
-            EditorGUILayout.HelpBox("Dev_Gameplay 씬에서 시작 좌표를 볼 수 있습니다.", MessageType.Info);
+            EditorGUILayout.HelpBox("Dev_Gameplay 씬에서 룸 입장 좌표를 볼 수 있습니다.", MessageType.Info);
             return;
         }
 
-        EditorGUILayout.LabelField("시작 좌표 (X, Y)", EditorStyles.boldLabel);
-        DrawPositionField("킹", kingStart);
-        DrawPositionField("룩", rookStart);
-        if (GUILayout.Button("시작 위치로 씬 뷰 이동"))
-            PlayerStartPositions.FocusSceneView();
+        int selectedIndex = GetSelectedIndex(entries);
+        var names = new string[entries.Length];
+        RoomTransitionController transition = Object.FindAnyObjectByType<RoomTransitionController>();
+        for (int i = 0; i < entries.Length; i++)
+            names[i] = entries[i].Room.name + " / " + entries[i].name +
+                       (transition != null && entries[i] == transition.StartingEntry ? " (게임 시작)" : "");
+
+        int nextIndex = EditorGUILayout.Popup("룸 입장 위치", selectedIndex, names);
+        if (nextIndex != selectedIndex)
+        {
+            selectedEntry = entries[nextIndex];
+            PlayerStartPositions.FocusSceneView(selectedEntry);
+        }
+
+        EditorGUILayout.LabelField("킹·룩 입장 좌표 (X, Y)", EditorStyles.boldLabel);
+        DrawPositionField("킹", selectedEntry.KingPoint);
+        DrawPositionField("룩", selectedEntry.RookPoint);
+        string moveLabel = transition != null && selectedEntry == transition.StartingEntry
+            ? "킹·룩 시작 위치로 복귀" : "킹·룩을 선택한 입장 위치로 이동";
+        using (new EditorGUI.DisabledGroupScope(EditorApplication.isPlayingOrWillChangePlaymode))
+        {
+            if (GUILayout.Button(moveLabel))
+                PlayerStartPositions.MovePlayersToEntry(selectedEntry);
+        }
+        if (GUILayout.Button("선택한 위치로 씬 뷰 이동"))
+            PlayerStartPositions.FocusSceneView(selectedEntry);
+    }
+
+    internal void FocusSelectedEntry()
+    {
+        RoomEntry[] entries = PlayerStartPositions.GetSceneEntries();
+        if (entries.Length > 0)
+            PlayerStartPositions.FocusSceneView(entries[GetSelectedIndex(entries)]);
+    }
+
+    private int GetSelectedIndex(RoomEntry[] entries)
+    {
+        for (int i = 0; i < entries.Length; i++)
+            if (entries[i] == selectedEntry) return i;
+
+        RoomTransitionController transition = Object.FindAnyObjectByType<RoomTransitionController>();
+        selectedEntry = transition != null && System.Array.IndexOf(entries, transition.StartingEntry) >= 0
+            ? transition.StartingEntry : entries[0];
+        return System.Array.IndexOf(entries, selectedEntry);
     }
 
     private static void DrawPositionField(string label, Transform marker)
@@ -339,6 +449,6 @@ internal sealed class StartPositionCoordinatesWindow : EditorWindow
         EditorGUI.BeginChangeCheck();
         Vector2 next = EditorGUILayout.Vector2Field(label, new Vector2(position.x, position.y));
         if (EditorGUI.EndChangeCheck())
-            PlayerStartPositions.SetStartPosition(marker, new Vector3(next.x, next.y, position.z));
+            PlayerStartPositions.SetEntryPosition(marker, new Vector3(next.x, next.y, position.z));
     }
 }

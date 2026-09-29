@@ -2,19 +2,20 @@ using Unity.Cinemachine;
 using UnityEngine;
 
 [DefaultExecutionOrder(-100)]
-[RequireComponent(typeof(CinemachineTargetGroup))]
+[RequireComponent(typeof(CinemachineTargetGroup), typeof(RoomTransitionController))]
 public sealed class CameraFramingFloor : MonoBehaviour
 {
-    [SerializeField] private Collider2D cameraBounds;
     [SerializeField, Min(0f)] private float reentryMargin = 0.5f;
 
     private CinemachineTargetGroup targetGroup;
+    private RoomTransitionController roomTransition;
     private float[] originalWeights;
     private bool[] excluded;
 
     private void Awake()
     {
         targetGroup = GetComponent<CinemachineTargetGroup>();
+        roomTransition = GetComponent<RoomTransitionController>();
     }
 
     private void OnEnable()
@@ -29,6 +30,9 @@ public sealed class CameraFramingFloor : MonoBehaviour
 
     private void LateUpdate()
     {
+        Collider2D cameraBounds = roomTransition != null && roomTransition.ActiveRoom != null
+            ? roomTransition.ActiveRoom.CameraBounds
+            : null;
         if (cameraBounds == null || !cameraBounds.enabled || targetGroup.Targets.Count != originalWeights.Length)
         {
             return;
