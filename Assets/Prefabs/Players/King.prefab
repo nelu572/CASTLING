@@ -121,9 +121,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dce3c7eb8f811ba4898bd6f9ad0a6d46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkEffect: {fileID: 0}
-  jumpEffect: {fileID: 0}
-  landingEffect: {fileID: 0}
   footstepDistance: 0.9
 --- !u!60 &3216277709502846996
 PolygonCollider2D:
@@ -171,13 +168,15 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.68, y: -1.497}
-      - {x: 0.68, y: -1.497}
+    - - {x: -0.68, y: -1.4}
+      - {x: 0.68, y: -1.4}
       - {x: 0.78, y: -1.2}
       - {x: 0.55, y: -0.2}
       - {x: 0.29, y: 0.74}
-      - {x: 0.44, y: 1.25}
-      - {x: -0.44, y: 1.25}
+      - {x: 0.4, y: 1.1}
+      - {x: 0.16, y: 1.47}
+      - {x: -0.16, y: 1.47}
+      - {x: -0.4, y: 1.1}
       - {x: -0.29, y: 0.74}
       - {x: -0.55, y: -0.2}
       - {x: -0.78, y: -1.2}
