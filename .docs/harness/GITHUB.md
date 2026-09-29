@@ -22,26 +22,26 @@ PR과 필요한 이슈에는 변경 유형 라벨 하나와 관련 영역 라벨
 
 | 라벨 | 용도 | 색상 |
 | --- | --- | --- |
-| `type:feature` | 신규 기능·콘텐츠 | `#16A34A` |
-| `type:fix` | 오류·회귀 수정 | `#DC2626` |
-| `type:improve` | 기존 동작·사용성 개선 | `#D97706` |
-| `type:refactor` | 동작 변경 없는 구조 개선 | `#7E22CE` |
-| `type:design` | UI·연출·아트 설계 | `#2563EB` |
-| `type:docs` | 문서와 기획 색인 | `#0284C7` |
-| `type:test` | 테스트·검증 환경 | `#0F766E` |
-| `type:chore` | 빌드·패키지·저장소 설정 | `#475569` |
+| `type:feature` | 신규 기능·콘텐츠 | `#22C55E` |
+| `type:fix` | 오류·회귀 수정 | `#EF4444` |
+| `type:improve` | 기존 동작·사용성 개선 | `#F59E0B` |
+| `type:refactor` | 동작 변경 없는 구조 개선 | `#A855F7` |
+| `type:design` | UI·연출·아트 설계 | `#6366F1` |
+| `type:docs` | 문서와 기획 색인 | `#06B6D4` |
+| `type:test` | 테스트·검증 환경 | `#14B8A6` |
+| `type:chore` | 빌드·패키지·저장소 설정 | `#64748B` |
 
 ### 게임 영역
 
 | 라벨 | 적용 범위 | 색상 |
 | --- | --- | --- |
-| `area:gameplay` | 킹·룩 조작, CASTLING, 퍼즐·목표·진행 | `#EA580C` |
-| `area:scene` | 씬 구성과 전환 | `#D97706` |
-| `area:input` | Input System과 조작 | `#1D4ED8` |
-| `area:core` | 공용 값·기반 시스템 | `#E11D48` |
-| `area:ui` | HUD와 메뉴 | `#DB2777` |
-| `area:audio` | BGM·효과음·믹서 | `#0F766E` |
-| `area:art` | 시각 에셋·아트 파이프라인 | `#2563EB` |
-| `area:build` | Unity·패키지·빌드 설정 | `#475569` |
+| `area:gameplay` | 킹·룩 조작, CASTLING, 퍼즐·목표·진행 | `#FB923C` |
+| `area:scene` | 씬 구성과 전환 | `#FBBF24` |
+| `area:input` | Input System과 조작 | `#60A5FA` |
+| `area:core` | 공용 값·기반 시스템 | `#FB7185` |
+| `area:ui` | HUD와 메뉴 | `#F472B6` |
+| `area:audio` | BGM·효과음·믹서 | `#2DD4BF` |
+| `area:art` | 시각 에셋·아트 파이프라인 | `#A78BFA` |
+| `area:build` | Unity·패키지·빌드 설정 | `#94A3B8` |
 
 `priority:*`, `status:*`, `good first issue` 같은 운영 라벨은 이슈가 실제로 늘어난 뒤 필요성이 확인되면 추가한다.
