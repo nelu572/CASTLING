@@ -13,6 +13,12 @@ public sealed class RoomTransitionController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float fadeDuration = 0.2f;
 
     private RoomArea[] rooms;
+    private CinemachineGroupFraming[] roomFramings;
+    private Vector2[] originalOrthoSizeRanges;
+    private CinemachineTargetGroup targetGroup;
+    private float[] originalTargetWeights;
+    private bool[] includedTargets;
+    private Camera outputCamera;
     private RoomArea activeRoom;
     private bool transitioning;
     private bool waitingForExitClear;
@@ -32,10 +38,29 @@ public sealed class RoomTransitionController : MonoBehaviour
         }
 
         rooms = roomsRoot.GetComponentsInChildren<RoomArea>(true);
+        roomFramings = new CinemachineGroupFraming[rooms.Length];
+        originalOrthoSizeRanges = new Vector2[rooms.Length];
+        targetGroup = GetComponent<CinemachineTargetGroup>();
+        if (targetGroup == null)
+        {
+            Debug.LogError("Room transition target group is missing.", this);
+            enabled = false;
+            return;
+        }
+
+        originalTargetWeights = new float[targetGroup.Targets.Count];
+        includedTargets = new bool[targetGroup.Targets.Count];
+        for (int i = 0; i < targetGroup.Targets.Count; i++)
+        {
+            originalTargetWeights[i] = targetGroup.Targets[i].Weight;
+        }
+
+        outputCamera = Camera.main;
         activeRoom = startingEntry.Room;
         bool foundStartingRoom = false;
-        foreach (RoomArea room in rooms)
+        for (int i = 0; i < rooms.Length; i++)
         {
+            RoomArea room = rooms[i];
             foundStartingRoom |= room == activeRoom;
             if (room.Camera == null || room.CameraBounds == null || room.Background == null)
             {
@@ -51,6 +76,16 @@ public sealed class RoomTransitionController : MonoBehaviour
                 enabled = false;
                 return;
             }
+
+            roomFramings[i] = room.Camera.GetComponent<CinemachineGroupFraming>();
+            if (roomFramings[i] == null)
+            {
+                Debug.LogError($"Room '{room.name}' camera is missing group framing.", room);
+                enabled = false;
+                return;
+            }
+
+            originalOrthoSizeRanges[i] = roomFramings[i].OrthoSizeRange;
         }
 
         if (!foundStartingRoom)
@@ -69,11 +104,13 @@ public sealed class RoomTransitionController : MonoBehaviour
         MovePlayer(king, startingEntry.KingPoint.position);
         MovePlayer(rook, startingEntry.RookPoint.position);
         Physics2D.SyncTransforms();
+        ApplyCameraZoomLimits();
         fadeOverlay.alpha = 0f;
     }
 
     private void Update()
     {
+        ApplyCameraZoomLimits();
         if (transitioning || activeRoom == null)
         {
             return;
@@ -104,6 +141,8 @@ public sealed class RoomTransitionController : MonoBehaviour
 
     private void OnDisable()
     {
+        RestoreCameraTargets();
+        RestoreCameraZoomLimits();
         if (!transitioning)
         {
             return;
@@ -116,6 +155,123 @@ public sealed class RoomTransitionController : MonoBehaviour
         }
 
         transitioning = false;
+    }
+
+    private void LateUpdate()
+    {
+        UpdateCameraTargets();
+    }
+
+    private void UpdateCameraTargets()
+    {
+        if (activeRoom == null || activeRoom.CameraBounds == null ||
+            targetGroup == null || targetGroup.Targets.Count != originalTargetWeights.Length)
+        {
+            return;
+        }
+
+        Bounds bounds = activeRoom.CameraBounds.bounds;
+        bool anyInside = false;
+        int nearestTarget = -1;
+        float nearestDistance = float.PositiveInfinity;
+        for (int i = 0; i < targetGroup.Targets.Count; i++)
+        {
+            CinemachineTargetGroup.Target target = targetGroup.Targets[i];
+            includedTargets[i] = false;
+            if (target.Object == null || originalTargetWeights[i] <= 0f) continue;
+
+            Vector3 point = target.Object.position;
+            bool inside = point.x >= bounds.min.x && point.x <= bounds.max.x &&
+                          point.y >= bounds.min.y && point.y <= bounds.max.y;
+            includedTargets[i] = inside;
+            anyInside |= inside;
+
+            float dx = point.x - Mathf.Clamp(point.x, bounds.min.x, bounds.max.x);
+            float dy = point.y - Mathf.Clamp(point.y, bounds.min.y, bounds.max.y);
+            float distance = dx * dx + dy * dy;
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestTarget = i;
+            }
+        }
+
+        // Cinemachine needs a target even if both characters leave the camera area.
+        if (!anyInside && nearestTarget >= 0) includedTargets[nearestTarget] = true;
+
+        bool changed = false;
+        for (int i = 0; i < targetGroup.Targets.Count; i++)
+        {
+            float weight = includedTargets[i] ? originalTargetWeights[i] : 0f;
+            if (targetGroup.Targets[i].Weight == weight) continue;
+            targetGroup.Targets[i].Weight = weight;
+            changed = true;
+        }
+
+        if (changed) targetGroup.DoUpdate();
+    }
+
+    private void RestoreCameraTargets()
+    {
+        if (targetGroup == null || originalTargetWeights == null) return;
+        int count = Mathf.Min(targetGroup.Targets.Count, originalTargetWeights.Length);
+        for (int i = 0; i < count; i++)
+        {
+            targetGroup.Targets[i].Weight = originalTargetWeights[i];
+        }
+
+        targetGroup.DoUpdate();
+    }
+
+    private void ApplyCameraZoomLimits()
+    {
+        if (outputCamera == null || !outputCamera.orthographic || rooms == null || roomFramings == null)
+        {
+            return;
+        }
+
+        float aspect = Mathf.Max(0.01f, outputCamera.aspect);
+        for (int i = 0; i < rooms.Length; i++)
+        {
+            CinemachineGroupFraming framing = roomFramings[i];
+            Collider2D cameraBounds = rooms[i].CameraBounds;
+            if (framing == null || cameraBounds == null || !cameraBounds.enabled)
+            {
+                continue;
+            }
+
+            Bounds bounds = cameraBounds.bounds;
+            float maximumFittingSize = Mathf.Min(bounds.size.x / (2f * aspect), bounds.size.y * 0.5f);
+            if (maximumFittingSize <= 0f)
+            {
+                continue;
+            }
+
+            Vector2 original = originalOrthoSizeRanges[i];
+            Vector2 limited = new Vector2(
+                Mathf.Min(original.x, maximumFittingSize),
+                Mathf.Min(original.y, maximumFittingSize));
+            if (framing.OrthoSizeRange != limited)
+            {
+                framing.OrthoSizeRange = limited;
+            }
+        }
+    }
+
+    private void RestoreCameraZoomLimits()
+    {
+        if (roomFramings == null || originalOrthoSizeRanges == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < roomFramings.Length; i++)
+        {
+            if (roomFramings[i] != null)
+            {
+                roomFramings[i].OrthoSizeRange = originalOrthoSizeRanges[i];
+            }
+        }
     }
 
     private IEnumerator EnterRoom(RoomEntry destination)

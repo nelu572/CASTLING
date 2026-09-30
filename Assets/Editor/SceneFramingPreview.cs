@@ -111,8 +111,8 @@ internal static class SceneFramingPreview
     {
         camera = Camera.main;
         brain = camera != null ? camera.GetComponent<CinemachineBrain>() : null;
-        CameraFramingFloor floor = Object.FindFirstObjectByType<CameraFramingFloor>();
-        group = floor != null ? floor.GetComponent<CinemachineTargetGroup>() : null;
+        RoomTransitionController roomTransition = Object.FindFirstObjectByType<RoomTransitionController>();
+        group = roomTransition != null ? roomTransition.GetComponent<CinemachineTargetGroup>() : null;
         virtualCamera = FindCameraForGroup(group);
         framing = virtualCamera != null ? virtualCamera.GetComponent<CinemachineGroupFraming>() : null;
         composer = virtualCamera != null ? virtualCamera.GetComponent<CinemachinePositionComposer>() : null;
@@ -224,13 +224,40 @@ internal static class SceneFramingPreview
         float maximumY = float.NegativeInfinity;
         Vector2 weightedCenter = Vector2.zero;
         float totalWeight = 0f;
+        bool hasInsideTarget = false;
+        int nearestTarget = -1;
+        float nearestDistance = float.PositiveInfinity;
 
-        foreach (CinemachineTargetGroup.Target target in group.Targets)
+        for (int i = 0; i < group.Targets.Count; i++)
         {
-            if (target.Object == null || target.Weight <= 0f ||
-                target.Object.position.y < bounds.min.y) continue;
+            CinemachineTargetGroup.Target target = group.Targets[i];
+            if (target.Object == null || target.Weight <= 0f) continue;
 
             Vector3 point = target.Object.position;
+            if (point.x >= bounds.min.x && point.x <= bounds.max.x &&
+                point.y >= bounds.min.y && point.y <= bounds.max.y)
+                hasInsideTarget = true;
+
+            float dx = point.x - Mathf.Clamp(point.x, bounds.min.x, bounds.max.x);
+            float dy = point.y - Mathf.Clamp(point.y, bounds.min.y, bounds.max.y);
+            float distance = dx * dx + dy * dy;
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestTarget = i;
+            }
+        }
+
+        for (int i = 0; i < group.Targets.Count; i++)
+        {
+            CinemachineTargetGroup.Target target = group.Targets[i];
+            if (target.Object == null || target.Weight <= 0f) continue;
+
+            Vector3 point = target.Object.position;
+            bool inside = point.x >= bounds.min.x && point.x <= bounds.max.x &&
+                          point.y >= bounds.min.y && point.y <= bounds.max.y;
+            if (hasInsideTarget ? !inside : i != nearestTarget) continue;
+
             float radius = Mathf.Max(0f, target.Radius);
             minimumX = Mathf.Min(minimumX, point.x - radius);
             maximumX = Mathf.Max(maximumX, point.x + radius);
