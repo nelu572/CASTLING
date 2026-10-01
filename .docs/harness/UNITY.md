@@ -28,6 +28,48 @@ Assets/
 - 현재 사용자 레이어는 `Player`, `Environment`, `Interactable`이며, 태그는 `Player`를 사용한다. `MainCamera`는 Unity 기본 태그를 상수로만 참조한다.
 - 레이어·태그를 추가·이름 변경·삭제할 때는 Unity Project Settings와 대응 `Values` 상수를 같은 변경에 반영한다.
 
+## 게임플레이 씬 계층 이름
+
+`Assets/Scenes/_Development/Dev_Gameplay.unity`의 역할별 이름과 대소문자를 기준으로 게임플레이 씬을 구성한다.
+
+```text
+Cameras
+├─ Main Camera
+└─ PlayerCameraTarget
+Grid                         # Grid 컴포넌트
+└─ Room_01                   # RoomArea 컴포넌트
+   ├─ Ground                 # 충돌 지형 Tilemap
+   ├─ BackGround
+   │  ├─ BaseColor
+   │  ├─ ParallaxOrigin
+   │  ├─ Structures_Far
+   │  │  └─ Visual
+   │  └─ Structures_Near
+   │     └─ Visual
+   ├─ Camera
+   │  ├─ PlayerGroupCamera
+   │  └─ CameraRoomBounds
+   ├─ Entries
+   │  └─ PlayerStartPositions # 최초 RoomEntry
+   │     ├─ KingStart
+   │     └─ RookStart
+   └─ Exits
+King
+Rook
+RoomTransitionCanvas
+└─ Fade
+```
+
+- 룸 이름은 `Room_01`, `Room_02`처럼 두 자리 순번을 쓴다. `Opening`, `Exchange` 같은 퍼즐 설명은 공통 역할 이름에 붙이지 않는다.
+- `Terrain`, `WorldBackground`, `WorldCamera`, `Entry_ChapterStart`처럼 같은 역할의 다른 이름을 만들지 않는다. 각각 `Ground`, `BackGround`, `Camera`, `Entries/PlayerStartPositions`를 사용한다.
+- 별도 룸으로 들어오는 시작점은 `Entries/Entry_FromRoom01`, 출구는 `Exits/Exit_ToRoom02`처럼 연결 대상을 쓴다. `Exits`가 비어 있다는 이유로 전환 기능을 추가하지 않는다.
+- 지형이 이어지는 한 공간은 퍼즐 구간 수와 관계없이 하나의 `RoomArea`로 유지한다. Chapter_01은 `Grid/Room_01` 하나를 사용한다.
+- 챕터 전용 완료 오브젝트는 `Room_01/ChapterGoal`처럼 기능 이름을 쓴다. 배경 장식과 퍼즐 오브젝트는 해당 역할 아래에 설명 가능한 이름으로 추가한다.
+- 룸의 장치는 `Puzzles` 아래에 둔다. 스위치 통로는 `Puzzles/PressureGatePair` 프리팹의 `Switch_Left`, `Switch_Right`, `Gate`처럼 역할별로 구분한다. 스위치·문 참조와 시각 오브젝트는 프리팹에 저장하고 런타임에 기본 구성을 조립하지 않는다.
+- 이전 초안을 남길 때는 `Archive_Original`, `Archive_Continuous`처럼 보관용 루트임을 표시하고 비활성 상태를 유지한다. 기존 초안의 컴포넌트 구성은 보존하며, 공통 자식 역할 이름은 위 기준을 따른다.
+- `RoomTransitionController.roomsRoot`에는 플레이에 사용하는 `Grid`만 연결한다. 비활성 초안까지 검색하므로 보관용 루트는 이 `Grid` 밖에 둔다.
+- 이름·부모 변경 시 월드 배치, Grid 설정, 타일, 카메라·시작점·완료 조건의 참조를 보존한다. 검증 도구도 가능한 한 컴포넌트 참조를 사용하며 과거 루트 이름에 의존하지 않는다.
+
 ## 안전한 변경과 확인
 
 - Unity가 만든 `.unity`, `.prefab`, `.asset`의 YAML과 `.meta` 파일을 임의로 편집하지 않는다.
