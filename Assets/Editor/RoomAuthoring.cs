@@ -139,9 +139,12 @@ internal static class RoomAuthoring
             BackgroundParallax newLayer = MapComponent(sourceLayer, sourceRoot, copyRoot);
             var sourceProperties = new SerializedObject(sourceLayer);
             Transform origin = sourceProperties.FindProperty("cameraOriginReference").objectReferenceValue as Transform;
+            Transform visual = sourceProperties.FindProperty("visualRoot").objectReferenceValue as Transform;
             var layerProperties = new SerializedObject(newLayer);
             layerProperties.FindProperty("cameraOriginReference").objectReferenceValue =
                 origin != null ? MapTransform(origin, sourceRoot, copyRoot) : null;
+            layerProperties.FindProperty("visualRoot").objectReferenceValue =
+                visual != null ? MapTransform(visual, sourceRoot, copyRoot) : null;
             layerProperties.ApplyModifiedProperties();
         }
     }

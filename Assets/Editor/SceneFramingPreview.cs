@@ -11,17 +11,20 @@ internal static class SceneFramingPreview
 {
     private const string MenuPath = "Tools/CASTLING/Live Camera & Parallax Preview";
     private const string PreferenceKey = "CASTLING.LiveCameraParallaxPreview";
+    private const string TransitionKey = PreferenceKey + ".WaitingForEditMode";
 
     private struct Layer
     {
         public Transform Transform;
-        public Vector3 WorldPosition;
         public Vector3 LocalPosition;
+        public Vector3 PreviewPosition;
         public Vector3 CameraOrigin;
         public BackgroundParallax Parallax;
     }
 
     private static readonly List<Layer> Layers = new List<Layer>();
+    private static bool waitingForEditMode = SessionState.GetBool(TransitionKey, false) ||
+                                             EditorApplication.isPlayingOrWillChangePlaymode;
     private static AnimationModeDriver driver;
     private static Scene previewScene;
     private static Camera camera;
@@ -64,6 +67,7 @@ internal static class SceneFramingPreview
     {
         Scene scene = EditorSceneManager.GetActiveScene();
         if (!EditorPrefs.GetBool(PreferenceKey, true) ||
+            waitingForEditMode ||
             EditorApplication.isPlayingOrWillChangePlaymode ||
             !scene.IsValid() || scene.name != SceneNames.Development.GameplaySandbox)
         {
@@ -141,11 +145,12 @@ internal static class SceneFramingPreview
                 .FindProperty("cameraOriginReference").objectReferenceValue as Transform;
             if (originReference != null &&
                 !confiner.BoundingShape2D.bounds.Contains(originReference.position)) continue;
+            Transform parallaxTransform = parallax.ParallaxTransform;
             Layers.Add(new Layer
             {
-                Transform = parallax.transform,
-                WorldPosition = parallax.transform.position,
-                LocalPosition = parallax.transform.localPosition,
+                Transform = parallaxTransform,
+                LocalPosition = parallax.RestLocalPosition,
+                PreviewPosition = parallaxTransform.position,
                 CameraOrigin = originReference != null ? originReference.position : cameraOrigin,
                 Parallax = parallax
             });
@@ -165,6 +170,7 @@ internal static class SceneFramingPreview
             {
                 RegisterAxis(layer.Transform, "m_LocalPosition.x", layer.LocalPosition.x);
                 RegisterAxis(layer.Transform, "m_LocalPosition.y", layer.LocalPosition.y);
+                RegisterAxis(layer.Transform, "m_LocalPosition.z", layer.LocalPosition.z);
             }
             brain.enabled = false;
             return true;
@@ -188,16 +194,22 @@ internal static class SceneFramingPreview
             camera.orthographicSize = size;
         }
 
-        foreach (Layer layer in Layers)
+        for (int i = 0; i < Layers.Count; i++)
         {
+            Layer layer = Layers[i];
             if (layer.Transform == null || layer.Parallax == null) continue;
             Vector3 delta = position - layer.CameraOrigin;
             SerializedObject properties = new SerializedObject(layer.Parallax);
             float horizontalRatio = properties.FindProperty("horizontalScrollRatio").floatValue;
             float verticalRatio = properties.FindProperty("verticalScrollRatio").floatValue;
-            Vector3 layerPosition = layer.WorldPosition + new Vector3(
+            Vector3 basePosition = layer.Transform.parent != null
+                ? layer.Transform.parent.TransformPoint(layer.LocalPosition)
+                : layer.LocalPosition;
+            Vector3 layerPosition = basePosition + new Vector3(
                 delta.x * (1f - horizontalRatio),
                 delta.y * (1f - verticalRatio), 0f);
+            layer.PreviewPosition = layerPosition;
+            Layers[i] = layer;
             if ((layer.Transform.position - layerPosition).sqrMagnitude <= 0.000001f) continue;
             layer.Transform.position = layerPosition;
             changed = true;
@@ -310,12 +322,26 @@ internal static class SceneFramingPreview
 
     private static void Stop()
     {
+        Stop(false);
+    }
+
+    private static void Stop(bool preserveLayerPreview)
+    {
         if (driver != null)
         {
             if (AnimationMode.InAnimationMode(driver)) AnimationMode.StopAnimationMode(driver);
             Object.DestroyImmediate(driver);
             driver = null;
             SceneView.RepaintAll();
+        }
+        if (preserveLayerPreview)
+        {
+            // Keep the last displayed offsets until runtime takes over.  The child's
+            // rest position remains zero, so these offsets cannot become authored bases.
+            foreach (Layer layer in Layers)
+            {
+                if (layer.Transform != null) layer.Transform.position = layer.PreviewPosition;
+            }
         }
         Layers.Clear();
         ClearReferences();
@@ -335,7 +361,10 @@ internal static class SceneFramingPreview
 
     private static void OnPlayModeChanged(PlayModeStateChange change)
     {
-        if (change == PlayModeStateChange.ExitingEditMode) Stop();
+        // Keep the gate across domain reloads until Unity has restored the Edit Mode scene.
+        waitingForEditMode = change != PlayModeStateChange.EnteredEditMode;
+        SessionState.SetBool(TransitionKey, waitingForEditMode);
+        Stop(change == PlayModeStateChange.ExitingEditMode);
     }
 
     private static void OnActiveSceneChanged(Scene previous, Scene next)
