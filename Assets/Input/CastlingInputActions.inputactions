@@ -23,6 +23,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Castling",
+                    "type": "Button",
+                    "id": "5d2bfc74-c672-47e6-bd40-121189b79280",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -69,6 +78,17 @@
                     "action": "Jump",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "73e38693-17cf-4800-a51e-c0e0fe668e22",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Castling",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -89,6 +109,15 @@
                     "name": "Jump",
                     "type": "Button",
                     "id": "4182fd9c-fd6a-44f4-837d-5ed5ce14c5f7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Slide",
+                    "type": "Value",
+                    "id": "5718b4df-d783-41a1-9ca7-0026e36d8f96",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -137,6 +166,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5d0623f6-ad3b-41da-a337-99ad2b1d6e96",
+                    "path": "<Keyboard>/rightShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Slide",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -315,6 +315,7 @@ public sealed class RoomTransitionController : MonoBehaviour
 
     private static void MovePlayer(Rigidbody2D player, Vector3 destination)
     {
+        player.GetComponent<RookSlideAbility>()?.StopSlide();
         player.linearVelocity = Vector2.zero;
         player.angularVelocity = 0f;
         player.position = destination;

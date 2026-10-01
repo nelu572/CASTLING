@@ -51,7 +51,12 @@ public sealed class PlayerMovement : MonoBehaviour
 
     public void OnMove(InputValue inputValue)
     {
-        horizontalInput = inputValue.Get<float>();
+        SetHorizontalInput(inputValue.Get<float>());
+    }
+
+    public void SetHorizontalInput(float input)
+    {
+        horizontalInput = input;
         eyes?.SetLookDirection(horizontalInput);
     }
 
