@@ -1,4 +1,5 @@
 if(!EditorApplication.isPlaying)throw new System.Exception("Play Mode needed.");
+if(SessionState.GetString("CASTLING.FollowupRoute","")=="running")return "This verification is already running.";
 var king=GameObject.Find("King").GetComponent<Rigidbody2D>();var rook=GameObject.Find("Rook").GetComponent<Rigidbody2D>();var kc=king.GetComponent<Collider2D>();var rc=rook.GetComponent<Collider2D>();
 var original=UnityEngine.InputSystem.InputSystem.settings;var originalEditorInput=original.editorInputBehaviorInPlayMode;var originalInputBackground=original.backgroundBehavior;bool originalBackground=Application.runInBackground;
 original.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;original.backgroundBehavior=UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;Application.runInBackground=true;
@@ -12,7 +13,8 @@ System.Action<UnityEngine.InputSystem.Key[]> input=keys=>{UnityEngine.InputSyste
 System.Action restore=()=>{input(new UnityEngine.InputSystem.Key[0]);original.editorInputBehaviorInPlayMode=originalEditorInput;original.backgroundBehavior=originalInputBackground;Application.runInBackground=originalBackground;for(int i=0;i<players.Length;i++){if(players[i]!=null){players[i].actions.devices=originalDevices[i];players[i].neverAutoSwitchControlSchemes=originalAutoSwitch[i];}}UnityEngine.InputSystem.InputSystem.RemoveDevice(testKeyboard);};
 
 input(new UnityEngine.InputSystem.Key[0]);
-float minCameraMargin=1f,maxCameraOutside=0f,maxCameraSize=0f;int cameraSamples=0,clippedSamples=0;int phase=0;float phaseAt=Time.time;bool ticking=false;int swaps=0;var rows=new System.Collections.Generic.List<object>();double deadline=EditorApplication.timeSinceStartup+100;
+float minCameraMargin=1f,maxCameraOutside=0f,maxCameraSize=0f;int cameraSamples=0,clippedSamples=0;int phase=0;float phaseAt=Time.time;bool ticking=false;int swaps=0;bool kingDescended=false,rookDescended=false;var rows=new System.Collections.Generic.List<object>();double deadline=EditorApplication.timeSinceStartup+100;
+var voidZone=GameObject.Find("Grid/Room_01/Puzzles/VoidFallZone").GetComponent<VoidRespawnZone>();
 var system=GameObject.Find("Grid/Room_01/Puzzles/PressureGatePair");var gate=system.GetComponentInChildren<PressureGate>();var plates=system.GetComponentsInChildren<PressurePlateSwitch>();var slide=rook.GetComponent<RookSlideAbility>();int slideSamples=0;
 var action=king.GetComponent<UnityEngine.InputSystem.PlayerInput>().actions.FindAction("King/Castling");System.Action<UnityEngine.InputSystem.InputAction.CallbackContext> trace=c=>{swaps++;};action.performed+=trace;
 EditorApplication.CallbackFunction tick=null;
@@ -30,64 +32,73 @@ System.Action<float,Rigidbody2D,UnityEngine.InputSystem.Key,UnityEngine.InputSys
 System.Action<int> next=p=>{phase=p;phaseAt=Time.time;SessionState.SetInt("CASTLING.FollowupPhase",phase);};
 if(phase==0){if(elapsed>.35f){record("saved_start");next(1);}}
 else if(phase==1){
-keys.Add(UnityEngine.InputSystem.Key.D);aim(21.4f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
-if(elapsed>2.5f&&king.position.x<9&&Mathf.Abs(king.linearVelocity.x)<.2f&&rook.position.x>21&&Mathf.Abs(rc.bounds.min.y)<.1f){record("king_physically_blocked_rook_walked_through");next(2);}
+keys.Add(UnityEngine.InputSystem.Key.D);aim(19.4f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
+if(elapsed>2.5f&&king.position.x<11&&Mathf.Abs(king.linearVelocity.x)<.2f&&rook.position.x>19&&Mathf.Abs(rc.bounds.min.y)<.1f){record("king_physically_blocked_rook_walked_through");next(2);}
 }
 else if(phase==2){
 if(elapsed>.5f&&king.linearVelocity.sqrMagnitude<.01f&&rook.linearVelocity.sqrMagnitude<.01f&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f){record("both_stationary_grounded_before_F");keys.Add(UnityEngine.InputSystem.Key.F);next(3);}
 }
 else if(phase==3){
-if(elapsed>.6f&&king.position.x>20&&rook.position.x<9&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f&&Mathf.Abs(king.linearVelocity.y)<.1f&&Mathf.Abs(rook.linearVelocity.y)<.1f){record("king_on_far_floor_after_grounded_F");next(4);}
+if(elapsed>.6f&&king.position.x>18&&rook.position.x<11&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f&&Mathf.Abs(king.linearVelocity.y)<.1f&&Mathf.Abs(rook.linearVelocity.y)<.1f){record("king_on_far_floor_after_grounded_F");next(4);}
 else if(elapsed>2f)throw new System.Exception("Grounded F settlement failed");
 }
 else if(phase==4){
-aim(23.6f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(20.4f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
-if(rook.position.x>20&&Mathf.Abs(rc.bounds.min.y)<.1f&&Mathf.Abs(rook.linearVelocity.x)<.4f){record("rook_walked_through_again_both_rejoined");next(5);}
+aim(25.6f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(18.4f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
+if(rook.position.x>18&&Mathf.Abs(rc.bounds.min.y)<.1f&&Mathf.Abs(rook.linearVelocity.x)<.4f){record("rook_walked_through_again_both_rejoined");next(5);}
 }
 else if(phase==5){
-aim(32.7f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(31.1f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
-if(elapsed>.8f&&king.position.x>32.3f&&rook.position.x>30.9f&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f&&Mathf.Abs(king.linearVelocity.x)<.3f&&Mathf.Abs(rook.linearVelocity.x)<.3f){record("both_walked_to_following_ground");next(6);}
+if(!kingDescended||!rookDescended){
+aim(27.3f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(28.8f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
+kingDescended|=kc.bounds.min.y<-3.8f&&Mathf.Abs(king.linearVelocity.y)<.2f;rookDescended|=rc.bounds.min.y<-3.8f&&Mathf.Abs(rook.linearVelocity.y)<.2f;
+if(kingDescended&&rookDescended)record("both_landed_on_descent_floor");
+}else{
+aim(34.7f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(37f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
+if(Mathf.Repeat(elapsed,.9f)<.12f){if(kc.bounds.min.y<-.1f)keys.Add(UnityEngine.InputSystem.Key.W);if(rc.bounds.min.y<-.1f)keys.Add(UnityEngine.InputSystem.Key.UpArrow);}
+}
+if(elapsed>.8f&&king.position.x>34.3f&&rook.position.x>36.7f&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f&&Mathf.Abs(king.linearVelocity.x)<.3f&&Mathf.Abs(rook.linearVelocity.x)<.3f){record("both_descended_and_jumped_to_following_ground");next(6);}
 }
 
 else if(phase==6){
-aim(39f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(36f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
-if(elapsed>.8f&&plates[0].IsPressed&&gate.IsOpen&&Mathf.Abs(king.position.x-39)<.2f&&rook.linearVelocity.sqrMagnitude<.01f){record("rook_holds_near_switch_gate_open");next(7);}
+aim(40f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(43f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
+if(elapsed>.8f&&plates[0].IsPressed&&gate.IsOpen&&Mathf.Abs(rook.position.x-43)<.2f&&king.linearVelocity.sqrMagnitude<.01f){record("king_holds_near_switch_gate_open");next(7);}
 }
 else if(phase==7){
-aim(48f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(36f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
-if(elapsed>.8f&&plates[0].IsPressed&&plates[1].IsPressed&&king.linearVelocity.sqrMagnitude<.01f){record("king_crossed_gate_holds_far_switch");keys.Add(UnityEngine.InputSystem.Key.F);next(8);}
+aim(40f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(52f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
+if(elapsed>.8f&&plates[0].IsPressed&&plates[1].IsPressed&&rook.linearVelocity.sqrMagnitude<.01f){record("rook_crossed_gate_holds_far_switch");keys.Add(UnityEngine.InputSystem.Key.F);next(8);}
 }
 else if(phase==8){
-if(elapsed>.65f&&king.position.x<37&&rook.position.x>47&&plates[0].IsPressed&&plates[1].IsPressed){record("grounded_F_hands_switch_roles_over");next(9);}
+if(elapsed>.65f&&king.position.x>51&&rook.position.x<41&&plates[0].IsPressed&&plates[1].IsPressed){record("grounded_F_hands_switch_roles_over");next(9);}
 }
 else if(phase==9){
-aim(45.5f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(48f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
-if(elapsed>.8f&&king.position.x>45.2f&&king.linearVelocity.sqrMagnitude<.01f&&plates[1].IsPressed&&gate.IsOpen){record("second_player_passes_while_far_switch_held");next(10);}
+aim(52f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(49.5f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
+if(elapsed>.8f&&rook.position.x>49.2f&&rook.linearVelocity.sqrMagnitude<.01f&&plates[1].IsPressed&&gate.IsOpen){record("second_player_passes_while_far_switch_held");next(10);}
 }
 else if(phase==10){
-aim(54.5f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(57.5f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
-if(elapsed>.8f&&Mathf.Abs(king.position.x-54.5f)<.2f&&Mathf.Abs(rook.position.x-57.5f)<.2f&&king.linearVelocity.sqrMagnitude<.01f&&rook.linearVelocity.sqrMagnitude<.01f&&!gate.IsOpen){record("both_rejoined_gate_closed_on_release");next(11);}
+// 뒤따르는 룩이 킹을 점프로 넘어 출발 순서를 정리한다. F는 착지 후 사용한다.
+if(rook.position.x<king.position.x+1.5f&&rook.position.x>king.position.x-2f&&Mathf.Repeat(elapsed,.9f)<.12f)keys.Add(UnityEngine.InputSystem.Key.UpArrow);
+aim(62.5f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(65.5f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
+if(elapsed>.8f&&Mathf.Abs(king.position.x-62.5f)<.2f&&Mathf.Abs(rook.position.x-65.5f)<.2f&&king.linearVelocity.sqrMagnitude<.01f&&rook.linearVelocity.sqrMagnitude<.01f&&!gate.IsOpen){record("both_rejoined_gate_closed_on_release");next(11);}
 }
 else if(phase==11){
 keys.Add(UnityEngine.InputSystem.Key.RightShift);keys.Add(UnityEngine.InputSystem.Key.RightArrow);
-if(rook.position.x>77f){record("rook_crosses_long_gap_with_horizontal_slide");next(12);}
+if(rook.position.x>85f){record("rook_crosses_long_gap_with_horizontal_slide");next(12);}
 }
 else if(phase==12){
-if(elapsed>.6f&&rook.position.x>76f&&Mathf.Abs(rc.bounds.min.y)<.1f&&rook.linearVelocity.sqrMagnitude<.01f&&king.linearVelocity.sqrMagnitude<.01f){record("both_grounded_before_gap_F");keys.Add(UnityEngine.InputSystem.Key.F);next(13);}
+if(elapsed>.6f&&rook.position.x>84f&&Mathf.Abs(rc.bounds.min.y)<.1f&&rook.linearVelocity.sqrMagnitude<.01f&&king.linearVelocity.sqrMagnitude<.01f&&Mathf.Abs(kc.bounds.min.y)<.1f){record("both_grounded_before_gap_F");keys.Add(UnityEngine.InputSystem.Key.F);next(13);}
 }
 else if(phase==13){
-if(elapsed>.65f&&king.position.x>76&&rook.position.x<56&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f){record("king_receives_far_landing_without_air_swap");next(14);}
+if(elapsed>.65f&&king.position.x>84&&rook.position.x<64&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f){record("king_receives_far_landing_without_air_swap");next(14);}
 }
 else if(phase==14){
-aim(80f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(57.5f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
-if(elapsed>.6f&&Mathf.Abs(rook.position.x-57.5f)<.2f&&rook.linearVelocity.sqrMagnitude<.01f&&king.position.x>79.7f){record("rook_returns_to_takeoff");next(15);}
+aim(92f,king,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A);aim(65.5f,rook,UnityEngine.InputSystem.Key.RightArrow,UnityEngine.InputSystem.Key.LeftArrow);
+if(elapsed>.6f&&Mathf.Abs(rook.position.x-65.5f)<.2f&&rook.linearVelocity.sqrMagnitude<.01f&&king.position.x>91.7f){record("rook_returns_to_takeoff");next(15);}
 }
 else if(phase==15){
 keys.Add(UnityEngine.InputSystem.Key.RightShift);keys.Add(UnityEngine.InputSystem.Key.RightArrow);
-if(rook.position.x>77f){record("rook_crosses_again_to_rejoin");next(16);}
+if(rook.position.x>85f){record("rook_crosses_again_to_rejoin");next(16);}
 }
 else if(phase==16){
-if(elapsed>.7f&&king.position.x>79f&&rook.position.x>76f&&rook.linearVelocity.sqrMagnitude<.01f&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f){record("both_rejoined_on_following_ground");done=true;SessionState.SetString("CASTLING.FollowupRoute",Newtonsoft.Json.JsonConvert.SerializeObject(new{success=swaps==3&&slideSamples>0,startedFromSavedSpawn=true,positionOrVelocityWritesDuringRoute=0,usedJump=false,usedSlide=true,castlingEvents=swaps,slideSamples,steps=rows}));}
+if(elapsed>.7f&&king.position.x>91f&&rook.position.x>84f&&rook.linearVelocity.sqrMagnitude<.01f&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f){record("both_rejoined_on_following_ground");done=true;SessionState.SetString("CASTLING.FollowupRoute",Newtonsoft.Json.JsonConvert.SerializeObject(new{success=swaps==3&&slideSamples>0&&kingDescended&&rookDescended&&voidZone.RespawnCount==0,voidRespawns=voidZone.RespawnCount,startedFromSavedSpawn=true,positionOrVelocityWritesDuringRoute=0,usedJump=true,usedSlide=true,kingDescended,rookDescended,castlingEvents=swaps,slideSamples,steps=rows}));}
 }
 
 input(keys.ToArray());

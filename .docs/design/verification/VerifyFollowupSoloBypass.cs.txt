@@ -1,4 +1,5 @@
 if(!EditorApplication.isPlaying)throw new System.Exception("Play Mode needed.");
+if(SessionState.GetString("CASTLING.FollowupSoloBypass","")=="running")return "This verification is already running.";
 var king=GameObject.Find("King").GetComponent<Rigidbody2D>();var rook=GameObject.Find("Rook").GetComponent<Rigidbody2D>();var kc=king.GetComponent<Collider2D>();var rc=rook.GetComponent<Collider2D>();
 var original=UnityEngine.InputSystem.InputSystem.settings;var originalEditorInput=original.editorInputBehaviorInPlayMode;var originalInputBackground=original.backgroundBehavior;bool originalBackground=Application.runInBackground;
 original.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;original.backgroundBehavior=UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;Application.runInBackground=true;
@@ -11,13 +12,13 @@ var update=typeof(UnityEngine.InputSystem.InputSystem).GetMethod("Update",System
 System.Action<UnityEngine.InputSystem.Key[]> input=keys=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(testKeyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(keys));update.Invoke(null,new object[]{UnityEngine.InputSystem.LowLevel.InputUpdateType.Dynamic});};
 System.Action restore=()=>{input(new UnityEngine.InputSystem.Key[0]);original.editorInputBehaviorInPlayMode=originalEditorInput;original.backgroundBehavior=originalInputBackground;Application.runInBackground=originalBackground;for(int i=0;i<players.Length;i++){if(players[i]!=null){players[i].actions.devices=originalDevices[i];players[i].neverAutoSwitchControlSchemes=originalAutoSwitch[i];}}UnityEngine.InputSystem.InputSystem.RemoveDevice(testKeyboard);};
 
-var floors=new[]{-5f,-5f,-4f,-2f};var xs=new[]{71f,73f,63f,61f};var rows=new System.Collections.Generic.List<object>();int stage=0;float at=Time.time;double deadline=EditorApplication.timeSinceStartup+30;bool passed=false;float maxX=0,maxFeet=-100;
+var floors=new[]{-5f,-5f,-2f,-2f,0f};var xs=new[]{74f,75f,69.5f,70f,67.5f};var rows=new System.Collections.Generic.List<object>();int stage=0;float at=Time.time;double deadline=EditorApplication.timeSinceStartup+30;bool passed=false;float maxX=0,maxFeet=-100;
 System.Action<Rigidbody2D,float,float> place=(body,x,floor)=>{var collider=body.GetComponent<Collider2D>();float offset=body.transform.position.y-collider.bounds.min.y;body.GetComponent<RookSlideAbility>()?.StopSlide();body.position=new Vector2(x,floor+offset+.025f);body.transform.position=new Vector3(x,body.position.y,body.transform.position.z);body.linearVelocity=Vector2.zero;};
-System.Action start=()=>{input(new UnityEngine.InputSystem.Key[0]);place(king,xs[stage],floors[stage]);place(rook,79f,0);Physics2D.SyncTransforms();at=Time.time;passed=false;maxX=xs[stage];maxFeet=floors[stage];};start();
+System.Action start=()=>{input(new UnityEngine.InputSystem.Key[0]);place(king,xs[stage],floors[stage]);place(rook,91f,0);Physics2D.SyncTransforms();at=Time.time;passed=false;maxX=xs[stage];maxFeet=floors[stage];};start();
 EditorApplication.CallbackFunction tick=null;bool ticking=false;
 tick=()=>{if(ticking)return;ticking=true;bool done=false;try{
 if(!EditorApplication.isPlaying||EditorApplication.timeSinceStartup>deadline)throw new System.Exception("Solo bypass deadline");
-float elapsed=Time.time-at;maxX=Mathf.Max(maxX,king.position.x);maxFeet=Mathf.Max(maxFeet,kc.bounds.min.y);passed|=king.position.x>74f&&kc.bounds.min.y>-.1f;
+float elapsed=Time.time-at;maxX=Mathf.Max(maxX,king.position.x);maxFeet=Mathf.Max(maxFeet,kc.bounds.min.y);passed|=king.position.x>82f&&kc.bounds.min.y>-.1f;
 var keys=new System.Collections.Generic.List<UnityEngine.InputSystem.Key>();if(elapsed>.3f){keys.Add(UnityEngine.InputSystem.Key.D);if(elapsed<.42f)keys.Add(UnityEngine.InputSystem.Key.W);}
 input(keys.ToArray());
 if(elapsed>3f){rows.Add(new{startingFloor=floors[stage],startX=xs[stage],success=!passed,maximumX=maxX,maximumFeet=maxFeet});if(passed)throw new System.Exception("King crossed from recovery shelf "+stage);stage++;if(stage==floors.Length){done=true;SessionState.SetString("CASTLING.FollowupSoloBypass",Newtonsoft.Json.JsonConvert.SerializeObject(new{success=true,stagedInitialPositions=true,usedActualWalkingAndJumpInput=true,cases=rows}));}else start();}

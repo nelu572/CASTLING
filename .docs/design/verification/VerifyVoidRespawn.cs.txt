@@ -1,0 +1,42 @@
+if(!EditorApplication.isPlaying)throw new System.Exception("Play Mode needed.");
+if(SessionState.GetString("CASTLING.VoidRespawn","")=="running")return "Void verification already running.";
+var king=GameObject.Find("King").GetComponent<Rigidbody2D>();var rook=GameObject.Find("Rook").GetComponent<Rigidbody2D>();var kc=king.GetComponent<Collider2D>();var rc=rook.GetComponent<Collider2D>();
+var original=UnityEngine.InputSystem.InputSystem.settings;var originalEditorInput=original.editorInputBehaviorInPlayMode;var originalInputBackground=original.backgroundBehavior;bool originalBackground=Application.runInBackground;
+original.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;original.backgroundBehavior=UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;Application.runInBackground=true;
+var players=new[]{king.GetComponent<UnityEngine.InputSystem.PlayerInput>(),rook.GetComponent<UnityEngine.InputSystem.PlayerInput>()};
+var originalDevices=players.Select(p=>p.actions.devices).ToArray();var originalAutoSwitch=players.Select(p=>p.neverAutoSwitchControlSchemes).ToArray();
+foreach(var p in players)p.neverAutoSwitchControlSchemes=true;
+var testKeyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>("CASTLINGVerificationKeyboard");
+foreach(var p in players)p.actions.devices=new UnityEngine.InputSystem.InputDevice[]{testKeyboard};
+var update=typeof(UnityEngine.InputSystem.InputSystem).GetMethod("Update",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic,null,new[]{typeof(UnityEngine.InputSystem.LowLevel.InputUpdateType)},null);
+System.Action<UnityEngine.InputSystem.Key[]> input=keys=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(testKeyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(keys));update.Invoke(null,new object[]{UnityEngine.InputSystem.LowLevel.InputUpdateType.Dynamic});};
+System.Action restore=()=>{input(new UnityEngine.InputSystem.Key[0]);original.editorInputBehaviorInPlayMode=originalEditorInput;original.backgroundBehavior=originalInputBackground;Application.runInBackground=originalBackground;for(int i=0;i<players.Length;i++){if(players[i]!=null){players[i].actions.devices=originalDevices[i];players[i].neverAutoSwitchControlSchemes=originalAutoSwitch[i];}}UnityEngine.InputSystem.InputSystem.RemoveDevice(testKeyboard);};
+
+var zone=GameObject.Find("Grid/Room_01/Puzzles/VoidFallZone").GetComponent<VoidRespawnZone>();
+var fade=GameObject.Find("RoomTransitionCanvas/Fade").GetComponent<CanvasGroup>();
+var slide=rook.GetComponent<RookSlideAbility>();
+var rows=new System.Collections.Generic.List<object>();
+int phase=0;float at=Time.unscaledTime;double deadline=EditorApplication.timeSinceStartup+60;bool ticking=false,deathObserved=false,frozenOkay=true;int frozenSamples=0;
+System.Action<Rigidbody2D,float,float> place=(b,x,floor)=>{var c=b.GetComponent<Collider2D>();float offset=b.transform.position.y-c.bounds.min.y;b.GetComponent<RookSlideAbility>()?.StopSlide();b.position=new Vector2(x,floor+offset+.025f);b.transform.position=new Vector3(x,b.position.y,b.transform.position.z);b.linearVelocity=Vector2.zero;};
+System.Action<string,bool> record=(name,ok)=>{rows.Add(new{name,success=ok,respawns=zone.RespawnCount,kingX=king.position.x,kingFeet=kc.bounds.min.y,rookX=rook.position.x,rookFeet=rc.bounds.min.y,timeScale=Time.timeScale,fade=fade.alpha});if(!ok)throw new System.Exception(name+" failed.");};
+System.Action<int> next=p=>{phase=p;at=Time.unscaledTime;SessionState.SetInt("CASTLING.VoidPhase",phase);};
+System.Func<bool> restored=()=>!zone.IsRespawning&&Mathf.Abs(king.position.x-62.5f)<.2f&&Mathf.Abs(rook.position.x-65.5f)<.2f&&Time.timeScale==1f&&fade.alpha==0f&&players.All(p=>p.inputIsActive)&&king.GetComponent<PlayerMovement>().enabled&&rook.GetComponent<PlayerMovement>().enabled&&!slide.IsMoving;
+place(king,62.5f,0);place(rook,65.5f,0);Physics2D.SyncTransforms();input(new UnityEngine.InputSystem.Key[0]);
+EditorApplication.CallbackFunction tick=null;
+tick=()=>{if(ticking)return;ticking=true;bool done=false;try{
+if(!EditorApplication.isPlaying||EditorApplication.timeSinceStartup>deadline)throw new System.Exception("Void verification deadline phase "+phase);
+float elapsed=Time.unscaledTime-at;var keys=new System.Collections.Generic.List<UnityEngine.InputSystem.Key>();
+if(zone.IsRespawning){deathObserved=true;frozenSamples++;frozenOkay&=Time.timeScale==0f&&players.All(p=>!p.inputIsActive)&&!king.GetComponent<PlayerMovement>().enabled&&!rook.GetComponent<PlayerMovement>().enabled;}
+if(phase==0){if(elapsed>.35f){keys.Add(UnityEngine.InputSystem.Key.RightShift);keys.Add(UnityEngine.InputSystem.Key.RightArrow);}if(rook.position.x>78f){record("actual_slide_released_over_void",slide.IsMoving);keys.Clear();next(1);}}
+else if(phase==1){if(zone.RespawnCount==1&&!zone.IsRespawning){record("rook_fall_restarts_both",deathObserved&&frozenOkay&&restored());deathObserved=false;place(king,74,-5);place(rook,85,0);Physics2D.SyncTransforms();next(2);}}
+else if(phase==2){if(elapsed>.35f)keys.Add(UnityEngine.InputSystem.Key.D);if(king.position.x>78f){keys.Clear();next(3);}}
+else if(phase==3){if(zone.RespawnCount==2&&!zone.IsRespawning){record("king_fall_restarts_both",deathObserved&&frozenOkay&&restored());deathObserved=false;place(king,77,-5);place(rook,79,-5);Physics2D.SyncTransforms();next(4);}}
+else if(phase==4){if(zone.RespawnCount==3&&!zone.IsRespawning){record("both_fall_produces_single_restart",deathObserved&&frozenOkay&&restored());next(5);}}
+else if(phase==5){if(elapsed>.4f){record("restart_stays_stable",zone.RespawnCount==3&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f);keys.Add(UnityEngine.InputSystem.Key.F);next(6);}}
+else if(phase==6){if(elapsed>.4f){record("castling_works_after_restart",king.position.x>65.3f&&rook.position.x<62.7f&&Mathf.Abs(kc.bounds.min.y)<.1f&&Mathf.Abs(rc.bounds.min.y)<.1f);next(7);}}
+else if(phase==7){keys.Add(UnityEngine.InputSystem.Key.RightShift);keys.Add(UnityEngine.InputSystem.Key.LeftArrow);if(rook.position.x<60f){record("rook_slide_works_after_restart",slide.IsMoving&&slide.Direction<0);keys.Clear();next(8);}}
+else if(phase==8){if(elapsed>.35f){record("normal_controls_restore_on_release",!slide.IsMoving&&rook.GetComponent<PlayerMovement>().enabled&&players.All(p=>p.inputIsActive)&&rook.gravityScale>0f&&zone.RespawnCount==3);done=true;SessionState.SetString("CASTLING.VoidRespawn",Newtonsoft.Json.JsonConvert.SerializeObject(new{success=true,stagedInitialPositions=true,usedActualWalkingAndSlideInput=true,frozenSamples,frozenOkay,steps=rows}));}}
+input(keys.ToArray());
+}catch(System.Exception e){done=true;SessionState.SetString("CASTLING.VoidRespawn",Newtonsoft.Json.JsonConvert.SerializeObject(new{success=false,error=e.Message,phase,frozenSamples,frozenOkay,steps=rows}));}
+if(done){EditorApplication.update-=tick;restore();}ticking=false;};
+SessionState.SetString("CASTLING.VoidRespawn","running");EditorApplication.update+=tick;return "Void fall, shared restart, simultaneous death and resumed controls verification running.";

@@ -2,9 +2,9 @@
 if(!EditorApplication.isPlaying)throw new System.Exception("Play Mode needed.");
 var king=GameObject.Find("King").GetComponent<Rigidbody2D>();var rook=GameObject.Find("Rook").GetComponent<Rigidbody2D>();var kc=king.GetComponent<Collider2D>();var rc=rook.GetComponent<Collider2D>();var camera=Camera.main;
 bool originalRunInBackground=Application.runInBackground;Application.runInBackground=true;bool originalKingSimulated=king.simulated,originalRookSimulated=rook.simulated;king.simulated=false;rook.simulated=false;
-var names=new[]{"left_edge","opening_split","opening_to_next_ground","long_separation","mid_chapter_low_ground","high_ledge_and_goal","right_goal"};
-var kp=new[]{new Vector2(0,1.43f),new Vector2(7.69f,1.43f),new Vector2(7.69f,1.43f),new Vector2(7.69f,1.43f),new Vector2(57,-1.57f),new Vector2(159.5f,17.73f),new Vector2(149,6.43f)};
-var rp=new[]{new Vector2(2.5f,1.33f),new Vector2(21.34f,1.33f),new Vector2(32.6f,1.33f),new Vector2(60,-1.67f),new Vector2(65,-1.67f),new Vector2(149,6.33f),new Vector2(153,6.33f)};
+var names=new[]{"left_edge","opening_split","opening_to_next_ground","opening_to_lower_floor","open_descent","long_separation","gap_lower_floor","final_landing","right_end_wall"};
+var kp=new[]{new Vector2(-4,1.43f),new Vector2(9.69f,1.43f),new Vector2(9.69f,1.43f),new Vector2(9.69f,1.43f),new Vector2(27.3f,-2.54f),new Vector2(19.69f,1.43f),new Vector2(72,-3.54f),new Vector2(92,1.46f),new Vector2(94.3f,1.46f)};
+var rp=new[]{new Vector2(-1.5f,1.33f),new Vector2(19.34f,1.33f),new Vector2(38.6f,1.33f),new Vector2(28.8f,-3.67f),new Vector2(33.1f,1.33f),new Vector2(68,-1.67f),new Vector2(75,-3.67f),new Vector2(85,1.33f),new Vector2(92.5f,1.33f)};
 var rows=new System.Collections.Generic.List<object>();int stage=0;float started=Time.time;double deadline=EditorApplication.timeSinceStartup+90;EditorApplication.CallbackFunction tick=null;
 System.Action place=()=>{king.position=kp[stage];rook.position=rp[stage];king.transform.position=new Vector3(kp[stage].x,kp[stage].y,king.transform.position.z);rook.transform.position=new Vector3(rp[stage].x,rp[stage].y,rook.transform.position.z);Physics2D.SyncTransforms();started=Time.time;};place();
 tick=()=>{bool done=false;try{
