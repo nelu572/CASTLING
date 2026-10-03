@@ -3,7 +3,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 
-DEST = Path(__file__).resolve().parents[2] / 'Assets/Sprite/Map'
+DEST = Path(__file__).resolve().parents[2] / 'Assets/Sprite/Map/Background'
 S = 3
 SIZE = (896, 1280)
 MAIN = (160, 155, 148, 255)
@@ -28,7 +28,7 @@ class Piece:
         self.draw.polygon([(round(x * S), round(y * S)) for x, y in points], fill=color)
 
     def save(self, name):
-        self.image.resize(SIZE, Image.Resampling.LANCZOS).save(DEST / name, optimize=True)
+        self.image.resize(SIZE, Image.Resampling.LANCZOS).save(DEST / 'Landmarks' / name, optimize=True)
 
 
 def foot(p, width=660):
@@ -111,7 +111,7 @@ def tiles():
             for x in range(2):
                 draw.rectangle((x * 64, y * 64, x * 64 + 63, y * 64 + 63),
                                fill=colors[order[y * 2 + x]])
-        image.save(DEST / name, optimize=True)
+        image.save(DEST / 'Patterns' / name, optimize=True)
 
 
 for make in (pawn, bishop, knight, queen, king, tiles):

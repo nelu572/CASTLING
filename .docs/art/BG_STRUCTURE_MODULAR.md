@@ -20,7 +20,7 @@
 
 ## 에셋과 원본
 
-- Sprite atlas: `Assets/Sprite/Map/BackgroundStructureModular/BG_Structure_Modular.png`
+- Sprite atlas: `Assets/Sprite/Map/Background/Structures/Modular/BG_Structure_Modular.png`
 - Unity Tile: `Assets/TilePalette/Background/ModularTiles/Near` 및 `Far`
 - Palette prefab: `Assets/TilePalette/Background/BG_Structure_Modular_{Near,Far}_TilePalette.prefab`
 - 수학적 원본: [BG_Structure_Modular_Source.svg](BG_Structure_Modular_Source.svg). 흰 마스크이며 Near/Far 색은 Tile.color로 적용된다.

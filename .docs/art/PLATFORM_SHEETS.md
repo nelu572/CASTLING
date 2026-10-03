@@ -2,8 +2,8 @@
 
 ## 원본 시트
 
-- 검정: [PlatformTiles_Dark.png](../../Assets/Sprite/Map/PlatformTiles_Dark.png)
-- 아이보리: [PlatformTiles_Ivory.png](../../Assets/Sprite/Map/PlatformTiles_Ivory.png)
+- 검정: [PlatformTiles_Dark.png](../../Assets/Sprite/Map/Platforms/PlatformTiles_Dark.png)
+- 아이보리: [PlatformTiles_Ivory.png](../../Assets/Sprite/Map/Platforms/PlatformTiles_Ivory.png)
 
 두 시트는 각각 3960×2548px이며 Sprite / Multiple, 128 PPU로 분할돼 있다. 기존 배치 위에 안쪽 꼭짓점 마감 조합 31종씩을 추가했다. 기존 타일의 픽셀·좌표·Sprite ID는 유지했다. 128px 셀 바깥에 2px 패딩이 있으므로 전체를 128px 격자로 다시 자동 분할하지 않는다.
 
