@@ -1,8 +1,7 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(Rigidbody2D), typeof(PlayerInput))]
+[RequireComponent(typeof(Rigidbody2D))]
 public sealed class CastlingAbility : MonoBehaviour
 {
     [SerializeField] private Rigidbody2D rook;
@@ -19,9 +18,9 @@ public sealed class CastlingAbility : MonoBehaviour
         }
     }
 
-    public void OnCastling(InputValue inputValue)
+    public void RequestCastling()
     {
-        if (inputValue.isPressed && enabled && Time.timeScale > 0f)
+        if (enabled && Time.timeScale > 0f)
         {
             ExchangePositions();
         }

@@ -1,8 +1,7 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(Rigidbody2D), typeof(PlayerMovement), typeof(PlayerInput))]
+[RequireComponent(typeof(Rigidbody2D), typeof(PlayerMovement))]
 public sealed class RookSlideAbility : MonoBehaviour
 {
     [SerializeField] private PlayerMovementSettings settings;
@@ -29,15 +28,15 @@ public sealed class RookSlideAbility : MonoBehaviour
         }
     }
 
-    public void OnMove(InputValue inputValue)
+    public void SetHorizontalInput(float input)
     {
-        horizontalInput = inputValue.Get<float>();
+        horizontalInput = input;
         TryBeginSlide();
     }
 
-    public void OnSlide(InputValue inputValue)
+    public void SetSlideHeld(bool isHeld)
     {
-        shiftHeld = inputValue.isPressed;
+        shiftHeld = isHeld;
         if (!shiftHeld)
         {
             StopSlide();

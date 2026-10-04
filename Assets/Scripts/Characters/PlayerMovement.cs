@@ -1,17 +1,13 @@
+using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(PolygonCollider2D), typeof(PlayerInput))]
+[RequireComponent(typeof(Rigidbody2D), typeof(PolygonCollider2D))]
 public sealed class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private PlayerMovementSettings settings;
 
     private Rigidbody2D body;
     private Collider2D bodyCollider;
-    private PlayerInput playerInput;
-    private PlayerGroundParticles groundParticles;
-    private PlayerEyes eyes;
-    private PlayerVisualFeedback visualFeedback;
 
     private readonly Collider2D[] groundCheckResults = new Collider2D[4];
     private ContactFilter2D groundFilter;
@@ -22,16 +18,17 @@ public sealed class PlayerMovement : MonoBehaviour
     private bool wasGrounded;
     private bool hasInitializedGroundState;
 
+    public event Action<float> HorizontalInputChanged;
+    public event Action<bool> WalkingUpdated;
+    public event Action Jumped;
+    public event Action Landed;
+
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
         bodyCollider = GetComponent<PolygonCollider2D>();
-        playerInput = GetComponent<PlayerInput>();
-        groundParticles = GetComponent<PlayerGroundParticles>();
-        eyes = GetComponent<PlayerEyes>();
-        visualFeedback = GetComponent<PlayerVisualFeedback>();
         int groundLayerMask = LayerMask.GetMask(Layers.Environment, Layers.Player);
-        if (body == null || bodyCollider == null || playerInput == null || settings == null || groundLayerMask == 0)
+        if (body == null || bodyCollider == null || settings == null || groundLayerMask == 0)
         {
             enabled = false;
             return;
@@ -49,23 +46,15 @@ public sealed class PlayerMovement : MonoBehaviour
         jumpBufferedUntil = float.NegativeInfinity;
     }
 
-    public void OnMove(InputValue inputValue)
-    {
-        SetHorizontalInput(inputValue.Get<float>());
-    }
-
     public void SetHorizontalInput(float input)
     {
         horizontalInput = input;
-        eyes?.SetLookDirection(horizontalInput);
+        HorizontalInputChanged?.Invoke(horizontalInput);
     }
 
-    public void OnJump(InputValue inputValue)
+    public void RequestJump()
     {
-        if (inputValue.isPressed)
-        {
-            jumpBufferedUntil = Time.time + settings.JumpBufferTime;
-        }
+        jumpBufferedUntil = Time.time + settings.JumpBufferTime;
     }
 
     private void FixedUpdate()
@@ -86,14 +75,10 @@ public sealed class PlayerMovement : MonoBehaviour
 
         wasGrounded = hasGroundContact;
         hasInitializedGroundState = true;
-        if (groundParticles != null && groundParticles.SetWalking(hasMoveInput && hasGroundContact))
-        {
-            visualFeedback?.PlayStep();
-        }
+        WalkingUpdated?.Invoke(hasMoveInput && hasGroundContact);
         if (justLanded)
         {
-            groundParticles?.PlayLanding();
-            visualFeedback?.PlayLanding();
+            Landed?.Invoke();
         }
 
         bool canJump = Time.time - lastGroundedAt <= settings.CoyoteTime;
@@ -109,7 +94,7 @@ public sealed class PlayerMovement : MonoBehaviour
             velocity.y = settings.JumpSpeed;
             jumpBufferedUntil = float.NegativeInfinity;
             lastGroundedAt = float.NegativeInfinity;
-            groundParticles?.PlayJump();
+            Jumped?.Invoke();
         }
 
         body.gravityScale = velocity.y < 0f

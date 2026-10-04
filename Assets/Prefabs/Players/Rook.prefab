@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 1009655146372570338}
   - component: {fileID: 7541195695270412806}
   - component: {fileID: 446899741395577889}
+  - component: {fileID: 1934641927381809526}
+  - component: {fileID: 7165974498788051910}
   m_Layer: 8
   m_Name: Rook
   m_TagString: Player
@@ -79,7 +81,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Actions: {fileID: -944628639613478452, guid: 3187c66576bc1ab4996b8a5268f295c3, type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 2
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -90,7 +92,67 @@ MonoBehaviour:
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-  m_ActionEvents: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: cb08c059-02c7-4bc1-8b7e-b8f622910329
+    m_ActionName: King/Move
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ad377a62-c4ec-44e1-8660-b10f107ca5b7
+    m_ActionName: King/Jump
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 5d2bfc74-c672-47e6-bd40-121189b79280
+    m_ActionName: King/Castling
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1934641927381809526}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnMove
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e07e1c10-902e-4750-aa29-6f1cddc8bcf7
+    m_ActionName: Rook/Move
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1934641927381809526}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnJump
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 4182fd9c-fd6a-44f4-837d-5ed5ce14c5f7
+    m_ActionName: Rook/Jump
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1934641927381809526}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnSlide
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 5718b4df-d783-41a1-9ca7-0026e36d8f96
+    m_ActionName: Rook/Slide
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: 
   m_DefaultActionMap: Rook
@@ -215,6 +277,30 @@ MonoBehaviour:
   minimumPlayerImpactSpeed: 0.5
   stepSquash: 0.025
   stepDuration: 0.12
+--- !u!114 &1934641927381809526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847224987886657651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1d2d96ea7a4cf34e890cb5c9c932227, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7165974498788051910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847224987886657651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e82004c229807ae4abfbeb317f63b1d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3412147566967647292
 GameObject:
   m_ObjectHideFlags: 0
