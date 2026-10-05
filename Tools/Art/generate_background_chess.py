@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -13,7 +14,8 @@ CLEAR = (0, 0, 0, 0)
 
 
 class Piece:
-    def __init__(self):
+    def __init__(self, output_dir):
+        self.output_dir = output_dir
         self.image = Image.new('RGBA', (SIZE[0] * S, SIZE[1] * S), CLEAR)
         self.draw = ImageDraw.Draw(self.image)
 
@@ -28,7 +30,9 @@ class Piece:
         self.draw.polygon([(round(x * S), round(y * S)) for x, y in points], fill=color)
 
     def save(self, name):
-        self.image.resize(SIZE, Image.Resampling.LANCZOS).save(DEST / 'Landmarks' / name, optimize=True)
+        output_path = self.output_dir / 'Landmarks' / name
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        self.image.resize(SIZE, Image.Resampling.LANCZOS).save(output_path, optimize=True)
 
 
 def foot(p, width=660):
@@ -37,8 +41,8 @@ def foot(p, width=660):
     p.rect((left, 1100, left + width, 1215), BASE, 36)
 
 
-def pawn():
-    p = Piece()
+def pawn(output_dir):
+    p = Piece(output_dir)
     p.ellipse((305, 235, 591, 521))
     p.rect((370, 490, 526, 632), MAIN, 28)
     p.ellipse((248, 565, 648, 755), MID)
@@ -47,8 +51,8 @@ def pawn():
     p.save('BG_PawnLandmark.png')
 
 
-def bishop():
-    p = Piece()
+def bishop(output_dir):
+    p = Piece(output_dir)
     p.ellipse((415, 125, 481, 191))
     p.poly([(448, 194), (543, 278), (612, 428), (607, 535),
             (551, 654), (345, 654), (289, 535), (284, 428), (353, 278)])
@@ -59,8 +63,8 @@ def bishop():
     p.save('BG_BishopLandmark.png')
 
 
-def knight():
-    p = Piece()
+def knight(output_dir):
+    p = Piece(output_dir)
     p.poly([(185, 555), (232, 480), (326, 424), (376, 343),
             (415, 225), (466, 318), (532, 276), (575, 378),
             (629, 427), (581, 485), (638, 550), (590, 615),
@@ -74,8 +78,8 @@ def knight():
     p.save('BG_KnightLandmark.png')
 
 
-def queen():
-    p = Piece()
+def queen(output_dir):
+    p = Piece(output_dir)
     tips = [(200, 267), (322, 191), (448, 221), (574, 191), (696, 267)]
     for x, y in tips:
         p.ellipse((x - 34, y - 34, x + 34, y + 34))
@@ -88,8 +92,8 @@ def queen():
     p.save('BG_QueenLandmark.png')
 
 
-def king():
-    p = Piece()
+def king(output_dir):
+    p = Piece(output_dir)
     p.rect((414, 125, 482, 348), MAIN, 20)
     p.rect((348, 187, 548, 257), MAIN, 20)
     p.poly([(337, 385), (285, 320), (298, 563), (364, 661),
@@ -101,18 +105,48 @@ def king():
     p.save('BG_KingLandmark.png')
 
 
-def tiles():
+def tiles(output_dir, patterns=('A', 'B')):
     colors = [(160, 155, 148, 200), (151, 146, 140, 200)]
-    for name, order in [('BG_CheckerTile_A.png', (0, 1, 1, 0)),
-                        ('BG_CheckerTile_B.png', (1, 0, 0, 1))]:
+    for pattern, name, order in [('A', 'BG_CheckerTile_A.png', (0, 1, 1, 0)),
+                                 ('B', 'BG_CheckerTile_B.png', (1, 0, 0, 1))]:
+        if pattern not in patterns:
+            continue
         image = Image.new('RGBA', (128, 128), CLEAR)
         draw = ImageDraw.Draw(image)
         for y in range(2):
             for x in range(2):
                 draw.rectangle((x * 64, y * 64, x * 64 + 63, y * 64 + 63),
                                fill=colors[order[y * 2 + x]])
-        image.save(DEST / 'Patterns' / name, optimize=True)
+        output_path = output_dir / 'Patterns' / name
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        image.save(output_path, optimize=True)
 
 
-for make in (pawn, bishop, knight, queen, king, tiles):
-    make()
+GENERATORS = {
+    'pawn': pawn,
+    'bishop': bishop,
+    'knight': knight,
+    'queen': queen,
+    'king': king,
+    'checker-a': lambda output_dir: tiles(output_dir, ('A',)),
+    'checker-b': lambda output_dir: tiles(output_dir, ('B',)),
+}
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description='Generate chess background PNGs.')
+    parser.add_argument(
+        '--output-dir', type=Path, default=DEST,
+        help='Output root containing Landmarks and Patterns (default: %(default)s).')
+    parser.add_argument(
+        '--only', choices=tuple(GENERATORS), nargs='+',
+        help='Generate only these outputs; omit to generate all seven PNGs.')
+    args = parser.parse_args(argv)
+
+    for name in dict.fromkeys(args.only or GENERATORS):
+        GENERATORS[name](args.output_dir)
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
