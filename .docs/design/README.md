@@ -30,15 +30,17 @@
 
 첫 구간은 바닥 아래를 채운 기반 지형, 6칸 길이의 낮은 통로와 연결된 지붕, 통로 다음의 열린 천장과 실제로 내려가는 홈으로 구성한다. 사용자 요청으로 맵 전체를 가로로 넓혔다. 시작점 왼쪽에 4칸, 통로 앞·통로 뒤·스위치 앞·스위치 통과 후·마지막 착지면에 각각 4칸을 추가해 카메라 영역 폭을 80에서 104로 늘렸다. 통로 길이 6, 스위치와 문 사이 간격 6, 룩 이동 홈의 폭 14와 단차 높이는 유지한다. 타일과 곡선 묶음을 원래 크기로 이어 붙이며 Transform Scale은 늘리지 않는다. 화면 밖 지형은 카메라 경계에서 한 칸 여유까지 남기고 불필요한 하부 빈틈은 만들지 않는다. 기본 카메라 크기 8과 위쪽 구도는 유지한다. 시작면은 검정, 다음 단차와 착지면은 아이보리다.
 
-큰 기반 지형과 연결된 지붕, 기존 검정·아이보리 팔레트를 사용한다. 배경의 목적은 먼 곳에 이어지는 다른 플랫폼과 구조물을 보여주는 것이다. Notion 아트 자료의 낮은 대비·레이어·크기 차이와 Dev_Gameplay의 수평 면·단차·아치 조형을 기준으로 한다. 기존의 타원형 언덕은 제거하고 Near/Far의 Visual 아래 Platforms_01–02에 연결된 플랫폼을 배치했다. 기존 Near_Fill, Round_R1, Inset_R1/R2 타일을 원래 크기로 사용한다. 수평 단차의 접합과 4칸 아치는 완전한 곡선 묶음으로 구성하며, 끝없는 반복 기둥이나 장식물은 추가하지 않는다. 색·알파·머티리얼·정렬·패럴랙스는 Dev_Gameplay Room_01의 실제 설정에 맞춘다. 가까운 층은 RGB 0.8·알파 1·정렬 순서 10, 먼 층은 RGB 1·알파 1·정렬 순서 5와 기존 Background_Far 머티리얼을 사용한다. 가로·세로 스크롤 비율은 Near 0.7, Far 0.35다. 두 층의 Main Camera·Visual·ParallaxOrigin 참조를 연결했고 패럴랙스 기준점 (13, 3.76)은 유지했다. Grid 셀 크기도 (1, 1, 0)으로 맞췄다. 하단은 −9까지만 채우고 플랫폼의 높은 면은 12 이하다. Visual과 개별 Tilemap의 크기는 1이다. 배경에는 충돌을 넣지 않는다. 가로 확장에서는 배경 바탕 BaseColor의 범위만 x−8–97로 늘렸으며 먼 플랫폼·기물의 배치와 시각 설정은 유지한다.
+배경의 목적은 먼 곳까지 이어지는 플랫폼 세계를 보여주는 것이다. Notion 내부 아트 보드와 [재기획 문서](../art/CHAPTER_01_BACKGROUND_PLAN.md)를 기준으로 Structures_Near·Structures_Mid·Structures_Far의 기존 Tilemap 5개를 다시 배치했다. 세 층 모두 같은 두꺼운 플랫폼 계열이며 Near는 짧게 드러나는 끝, Mid는 그 뒤의 상단과 끝, Far는 간격을 두고 넓게 이어지는 면으로 구성한다. 각 층에는 독립된 검정·흰색 플랫폼을 함께 둔다. 검정/흰색 명도는 Near 76/245, Mid 140/225, Far 188/218이고 정렬은 10/8/7이다. 가로 패럴랙스 비율은 0.8/0.5/0.28, 세로는 0.7/0.5/0.35다. 기존 Camera·ParallaxOrigin 참조와 기준점 (13, 3.76)을 공유하며 Visual만 이동한다. 기존 모듈형 Sprite를 참조하는 Neutral.asset과 중성 Tile Palette를 사용하고, Tilemap.color는 흰색, 셀별 SetColor로 플랫폼 색을 저장한다. Tilemap Transform Scale은 1이고 배경 Collider는 없다. Unity URP 기본 Sprite-Unlit-Default 머티리얼을 사용한다. SkyTone은 기존 Fill_0_0 Sprite와 중성 단색 tint를 사용하며 별도의 PNG는 필요하지 않다. 구체적인 배치와 검증 기록은 [배경 구성 기록](../art/CHAPTER_01_BACKGROUND.md)을 따른다.
 
-첫 화면과 룩 이동 구간에는 하부에서 올라오는 거대한 킹·룩 구조물을 배치했다. Dev_Gameplay의 기존 BG_KingLandmark·BG_RookLandmark 스프라이트를 같은 기준인 Structures_Far/Visual의 KingStructure·RookStructure로 사용한다. 폰을 킹으로 교체하고 오른쪽 먼 플랫폼 뒤로 옮겼다. 킹은 좌표 (20.5, 3.15)·크기 1.85, 룩은 (34, 0.45)·크기 2.28이다. 킹의 실루엣 전체 높이는 약 16칸으로, 화면에서는 조금 작아 보이면서도 긴 몸통이 아치·단차 뒤로 이어지도록 배치했다. 십자가·왕관은 지붕에 일부 가려져 보이고 받침 하부는 바닥 아래로 가린다. 두 기물 모두 Dev_Gameplay의 PawnLandmark처럼 흰색·알파 1·Background_Far 머티리얼·정렬 순서 6을 사용한다. 2026-10-02에 Dev_Gameplay를 다시 열어 해당 값과 참조를 대조했고 차이가 없었다. 캡처별 실제 입력 경로와 구도 확인용 배치는 [캡처 목록](captures/README.md)에서 구분한다.
+배경 킹·룩 구조물은 사용자의 요청에 따라 Structures_Far/Visual 아래에 비활성 상태로 보존한다. 현재 배경에는 표시하지 않는다. 실제 입력 경로와 구도 확인용 배치는 [캡처 목록](captures/README.md)에서 구분한다.
 
 룩 이동 구간의 오른쪽 착지면은 작은 곡선으로 마감해 킹이 벽을 타고 올라가는 우회를 막았다. 자세한 지형 타일 구성은 각 구간 문서와 [플랫폼 시트](../art/PLATFORM_SHEETS.md)를 따른다.
 
 참고 조사에서는 [ibb & obb](https://ibbandobb.com/)의 빈 공간과 연결 면, [Thomas Was Alone](https://www.nintendo.com/en-gb/Games/Wii-U-download-software/Thomas-Was-Alone-938127.html)의 단순한 덩어리 배치, [Monument Valley](https://www.monumentvalleygame.com/)의 아치·기둥과 배경 톤을 비교했다. 실제 프로젝트 조형 기준은 Dev_Gameplay와 Notion 아트 기획이다.
 
 계층 이름·룸·프리팹 구성은 [Unity 하네스](../harness/UNITY.md)를 따른다.
+
+현재 배경은 총 4,610칸이다. 실제 Play Mode에서 시작·하강·중간·긴 홈 앞·하부 복귀·최대 확대·마지막·좌우 경계의 합성 구도 9개와 거리층 단독 화면 3개를 확인했다. 카메라 검사 12건을 통과했고 배경 밖 136개 컴포넌트의 저장 상태 변경은 0개다. 이는 배경 구도 검사이며 실제 입력으로 퍼즐을 완주한 검증과 구분한다. 배경 아트의 최종 확정을 의미하지 않는다.
 
 ## 검증 하네스
 

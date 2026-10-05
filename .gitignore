@@ -9,6 +9,7 @@
 # Local gameplay captures and one-off verification reports
 /.docs/design/captures/
 /.docs/design/*_VERIFICATION.json
+/.docs/art/chapter01-background/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
