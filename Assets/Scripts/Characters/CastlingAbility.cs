@@ -35,5 +35,7 @@ public sealed class CastlingAbility : MonoBehaviour
         king.transform.position = new Vector3(rookPosition.x, rookPosition.y, king.transform.position.z);
         rook.transform.position = new Vector3(kingPosition.x, kingPosition.y, rook.transform.position.z);
         Physics2D.SyncTransforms();
+        king.GetComponent<PlayerMovement>()?.ClearGroundedHistory();
+        rook.GetComponent<PlayerMovement>()?.ClearGroundedHistory();
     }
 }

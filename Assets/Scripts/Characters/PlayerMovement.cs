@@ -57,6 +57,11 @@ public sealed class PlayerMovement : MonoBehaviour
         jumpBufferedUntil = Time.time + settings.JumpBufferTime;
     }
 
+    public void ClearGroundedHistory()
+    {
+        lastGroundedAt = float.NegativeInfinity;
+    }
+
     private void FixedUpdate()
     {
         bool hasGroundContact = IsGrounded(out Rigidbody2D groundBody);
