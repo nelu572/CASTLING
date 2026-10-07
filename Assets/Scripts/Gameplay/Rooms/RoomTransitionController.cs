@@ -148,6 +148,7 @@ public sealed class RoomTransitionController : MonoBehaviour
             return;
         }
 
+        StopAllCoroutines();
         Time.timeScale = previousTimeScale;
         if (fadeOverlay != null)
         {
