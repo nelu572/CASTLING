@@ -16,4 +16,5 @@
 - 코드·씬·에셋 변경 후 검증을 요청받거나 커밋 전에 검증할 때는 [.codex/skills/UNITY_VERIFY.md](.codex/skills/UNITY_VERIFY.md)를 따른다.
 - 사용자가 커밋을 명시적으로 요청하면 stage·commit 전에 [.codex/skills/AUTO_COMMIT.md](.codex/skills/AUTO_COMMIT.md)를 따른다.
 - GitHub PR, 라벨, 이슈 관련 작업은 [.codex/harness/GITHUB.md](.codex/harness/GITHUB.md)를 먼저 읽는다. 사용자가 PR 또는 이슈 생성을 명시적으로 요청하면 각각 [.codex/skills/AUTO_PR.md](.codex/skills/AUTO_PR.md), [.codex/skills/AUTO_ISSUE.md](.codex/skills/AUTO_ISSUE.md)를 추가로 따른다.
+- 사용자의 지속적인 사전 요청에 따라 작업 중 새로 발견해 재현한 버그는 수정 전에 같은 목적의 열린 이슈를 확인하고, 중복이 없으면 [이슈 생성 절차](.codex/skills/AUTO_ISSUE.md)에 따라 먼저 등록한다. 해당 버그 이슈 생성은 매번 재승인을 요구하지 않으며, 수정·검증 결과는 이슈 코멘트에 기록한다.
 - 사용자가 Notion 안내 갱신을 명시적으로 요청하면 [.codex/skills/REFRESH_NOTION_GUIDE.md](.codex/skills/REFRESH_NOTION_GUIDE.md)를 따른다.
