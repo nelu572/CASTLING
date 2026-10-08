@@ -2,7 +2,7 @@
 
 현재 `Dev_Gameplay`은 한 씬의 `Grid` 아래에 여러 룸을 두는 구조다. 각 룸은 자기 지형, 배경, 카메라 경계, 입장 지점, 출구를 가진다.
 
-룸 복제·시작 위치·Live Camera & Parallax Preview 도구는 현재 `Dev_Gameplay` 전용이다.
+룸 복제·Live Camera & Parallax Preview 도구는 현재 `Dev_Gameplay` 전용이다. 시작 위치 도구는 현재 편집 씬의 `RoomTransitionController`와 연결된 룸 구성을 기준으로 동작한다.
 
 ```text
 Grid
@@ -27,13 +27,17 @@ Grid
    `Structures_Near`와 `Structures_Far`는 1×1 조각으로 구조물을 조립한다. `BG_Structure_Modular_TilePalette` 왼쪽 `Near` / 오른쪽 `Far` 영역의 직선과 대칭 곡선 조각을 사용한다. 현재 배치의 색을 유지하려면 같은 Tile 색상 계열을 선택한다.
    곡선 전체를 찍으려면 팔레트에서 해당 모양의 영역 전체(빈 칸 포함)를 선택한다. 타일의 Transform Scale로 크기를 바꾸지 않는다. 조각의 배치·사용법은 [배경 구조물 조립 타일](BG_STRUCTURE_MODULAR.md)을 따른다.
 3. `Camera/CameraRoomBounds`의 `BoxCollider2D` 범위를 새 룸에 맞춘다. 복제 도구가 `RoomArea`와 카메라 `CinemachineConfiner2D`를 **같은 새 콜라이더**에 연결하므로 이 박스의 크기와 위치만 조절하면 된다. 지형 크기에서 카메라 범위를 자동 계산하지는 않는다.
-4. `Entries/Entry_FromRoom01`을 `Entry_FromRoom02`처럼 실제 진입 경로에 맞게 이름을 바꾼다. 그 아래 `KingStart`, `RookStart`를 플레이어가 도착할 자리로 옮긴다. `Tools > CASTLING > 시작 위치 > 시작 좌표 보기`에서 이 Entry를 선택해 좌표를 수정하거나 씬 뷰로 이동할 수 있다.
+4. `Entries/Entry_FromRoom01`을 `Entry_FromRoom02`처럼 실제 진입 경로에 맞게 이름을 바꾼다. 그 아래 `KingStart`, `RookStart`를 플레이어가 도착할 자리로 옮긴다. `Tools > CASTLING > 시작 위치 > 시작 좌표 보기`에서 대상 컨트롤러와 Entry를 선택해 좌표를 수정하거나 씬 뷰로 이동할 수 있다. **미리보기 표시**를 켜면 Scene View에 킹·룩 윤곽과 드래그 기능이 나타난다.
 5. 출발 룸인 `Room_02/Exits` 아래에 `Exit_ToRoom03` 빈 오브젝트를 만든다. `RoomExit`을 추가하면 `BoxCollider2D`도 추가된다. 콜라이더의 `Is Trigger`를 켜고 출구 영역에 맞게 배치한다. `RoomExit > Destination`에 `Room_03/Entries/Entry_FromRoom02`를 지정한다. 복제된 룸에 원래 있던 출구는 목적지가 비워지므로 필요한 것만 다시 연결한다. 현재 전환 조건은 **킹과 룩의 중심이 동시에 이 콜라이더 안에 들어오는 것**이다.
 6. 씬을 저장하고 플레이한다. 두 캐릭터를 출구에 넣어 Room_03 입장 위치, 카메라 경계, 룸별 배경 전환, Console 오류 여부를 확인한다.
 
 복제 메뉴가 비활성이면 활성 씬, Play Mode 전환 여부, 선택한 `RoomArea`의 부모와 `Rooms Root`, `RoomTransitionController` 존재 여부, 원본 `RoomArea`의 카메라·경계·배경 참조를 확인한다. Animation Mode나 Live Preview가 켜져 있으면 메뉴 실행 시 복제가 중단된다. 복제할 카메라·경계·배경·Entry 마커와 지정된 패럴랙스 Origin·Visual 참조는 원본 룸 안에 있어야 한다.
 
 ## 여러 갈래와 시작 룸
+
+- 시작 위치 도구는 현재 씬의 활성 오브젝트에 붙은 `RoomTransitionController`만 대상으로 한다. 하나이면 자동 선택하고, 여러 개이면 창에서 선택한다. 메뉴·메인 씬처럼 대상이 없는 씬에서는 안내만 표시한다.
+- 킹·룩은 컨트롤러의 `King`·`Rook` 참조를 사용하며, 목록과 편집 범위는 연결된 `Rooms Root` 아래의 유효한 `RoomEntry`로 제한한다. 참조는 현재 씬 안에 있어야 한다. `Rooms Root` 밖의 보관용 룸과 다른 로드된 씬은 포함하지 않는다.
+- 윤곽 미리보기와 드래그는 **미리보기 표시**를 직접 켠 동안만 동작한다. 창을 닫거나 대상·활성 씬을 바꾸거나 Play Mode로 전환하면 꺼진다. Game View에는 표시하지 않으며, Play Mode에서는 위치 편집·캐릭터 이동이 비활성화된다.
 
 - 한 룸에서 여러 곳으로 갈 때는 그 룸의 `Exits`에 `RoomExit`을 더 만들고, 각각 다른 `RoomEntry`를 `Destination`으로 지정한다.
 - 같은 룸으로 들어오는 경로마다 도착 위치가 달라야 하면 대상 룸의 `Entries`에 `RoomEntry`를 더 만든다. 각 Entry에 `KingStart`·`RookStart` 마커를 배치하고, `RoomEntry` Inspector의 `King Point`·`Rook Point`에 각각 연결한다. 이름만으로 자동 연결되지 않는다.
