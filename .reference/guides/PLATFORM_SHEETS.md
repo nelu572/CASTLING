@@ -15,7 +15,7 @@ Unity Tile Palette에서 **Ground_Auto_TilePalette**를 선택한다. 왼쪽 검
 
 | 팔레트 | 용도 |
 | --- | --- |
-| Ground_Auto_TilePalette | 자동 사각 지형과 자동 곡선 |
+| Ground_Auto_TilePalette | 위쪽 `Basic Platforms`: 기본 사각 발판·블록·기둥. 아래쪽 `Curves`: 자동 곡선 |
 | Ground_Manual_Shapes_TilePalette | 왼쪽 `Manual Shapes`: 수동 곡선·기본 부품. 오른쪽 `Base / Inner Join`: 기존 타일과 안쪽 꼭짓점 마감 |
 | Ground_Manual_CurveBorders_TilePalette | 왼쪽 `Dark`, 오른쪽 `Ivory`: 수동 외곽선 32조합 |
 
@@ -23,7 +23,8 @@ Unity Tile Palette에서 **Ground_Auto_TilePalette**를 선택한다. 왼쪽 검
 
 `Ground_Manual_Shapes_TilePalette`는 **Cell Sizing: Manual**, Grid의 **Cell Size: (1, 1, 1)**을 유지한다. 가는 부품과 2×2·3×3 단일 Sprite가 함께 있어 Automatic에서는 셀이 3×3으로 계산되고 1×1 조각들이 떨어져 보인다. 팔레트 통합·수정 뒤에는 저장된 프리팹뿐 아니라 실제 Tile Palette 창을 다시 열어 셀 크기와 곡선 묶음의 접합을 확인한다.
 
-- 사각 지형은 맨 아래 `Square` 한 칸을 집어 칠한다.
+- 사각 지형은 위쪽 `Basic Platforms`의 `Square 1x1` 한 칸을 집어 칠한다. 왼쪽 x=0은 검정, 오른쪽 x=14는 아이보리다.
+- 기본 영역에는 `Platform 4x1`, `Platform 8x1`, `Block 4x2`, `Column 2x4` 묶음도 있다. 원하는 묶음 전체를 선택해 한 번에 찍고, 1×1 사각 타일로 길이·높이를 늘리거나 줄인다. 같은 기존 자동 사각 Tile을 조립한 선택 예시이므로 모양마다 새 Tile·Sprite를 만들지 않는다.
 - 곡선·아치는 원하는 형태의 묶음 전체를 집어 칠한다. 빈 칸도 선택 영역에 포함한다.
 - 회전·뒤집기는 기본 GridBrush를 사용한다. 크기는 부품 종류로 고르고 Transform Scale로 늘리지 않는다.
 - 배치·지우기·Undo/Redo에 따라 노출 면에는 선이 생기고, 실제로 맞닿은 면에서는 선이 빠진다.
