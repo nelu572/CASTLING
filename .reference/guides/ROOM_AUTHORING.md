@@ -24,7 +24,7 @@ Grid
 
 1. `Assets/Scenes/_Development/Dev_Gameplay`을 활성 씬으로 열고 Play Mode·Animation Mode와 `Tools > CASTLING > Live Camera & Parallax Preview`를 끈다. Hierarchy에서 `RoomTransitionController > Rooms Root`에 연결된 `Grid`의 직계 자식 `RoomArea`(예: `Room_02`) 또는 그 자식을 선택한 뒤 `Tools > CASTLING > 룸 > 선택한 룸 복제`를 누른다. 새 룸은 `Room_03`처럼 다음 번호를 받고, 기존 룸의 화면 요소와 겹치지 않는 오른쪽 공간에 놓인다.
 2. `Ground` 타일맵에서 바닥과 천장을 함께 편집한다. `BackGround/BaseColor`와 `Structures_Near`, `Structures_Far`도 새 룸에 맞게 편집한다.
-   `Structures_Near`와 `Structures_Far`는 1×1 조각으로 구조물을 조립한다. `BG_Structure_Modular_Near_TilePalette` / `BG_Structure_Modular_Far_TilePalette`의 직선과 대칭 곡선 조각을 사용한다. 현재 배치의 색을 유지하려면 같은 Tile 색상 계열을 선택한다.
+   `Structures_Near`와 `Structures_Far`는 1×1 조각으로 구조물을 조립한다. `BG_Structure_Modular_TilePalette` 왼쪽 `Near` / 오른쪽 `Far` 영역의 직선과 대칭 곡선 조각을 사용한다. 현재 배치의 색을 유지하려면 같은 Tile 색상 계열을 선택한다.
    곡선 전체를 찍으려면 팔레트에서 해당 모양의 영역 전체(빈 칸 포함)를 선택한다. 타일의 Transform Scale로 크기를 바꾸지 않는다. 조각의 배치·사용법은 [배경 구조물 조립 타일](BG_STRUCTURE_MODULAR.md)을 따른다.
 3. `Camera/CameraRoomBounds`의 `BoxCollider2D` 범위를 새 룸에 맞춘다. 복제 도구가 `RoomArea`와 카메라 `CinemachineConfiner2D`를 **같은 새 콜라이더**에 연결하므로 이 박스의 크기와 위치만 조절하면 된다. 지형 크기에서 카메라 범위를 자동 계산하지는 않는다.
 4. `Entries/Entry_FromRoom01`을 `Entry_FromRoom02`처럼 실제 진입 경로에 맞게 이름을 바꾼다. 그 아래 `KingStart`, `RookStart`를 플레이어가 도착할 자리로 옮긴다. `Tools > CASTLING > 시작 위치 > 시작 좌표 보기`에서 이 Entry를 선택해 좌표를 수정하거나 씬 뷰로 이동할 수 있다.

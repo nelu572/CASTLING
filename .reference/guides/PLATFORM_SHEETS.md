@@ -9,16 +9,19 @@
 
 ## 맵 칠하기
 
-Unity Tile Palette에서 **AutoPlatforms_TilePalette**를 선택한다. 왼쪽 검정, 오른쪽 아이보리다.
+Unity Tile Palette에서 **Ground_Auto_TilePalette**를 선택한다. 왼쪽 검정, 오른쪽 아이보리다.
 
-팔레트 5개는 서로 다른 타일을 포함하므로 역할별로 유지한다. 팔레트는 편집용 프리팹이며 실제 지형 타일은 아래 라이브러리 4개에 저장된다.
+지형 팔레트는 자동·수동 모양·수동 외곽선의 3개로 구분한다. 이름은 `영역_용도_변형_TilePalette` 형식이며 지형은 `Ground_`, 배경은 `BG_`로 시작한다. 변형이 없으면 해당 부분은 생략한다. 팔레트는 편집용 프리팹이며 실제 지형 타일은 아래 라이브러리 4개에 저장된다.
 
 | 팔레트 | 용도 |
 | --- | --- |
-| AutoPlatforms_TilePalette | 자동 사각 지형과 자동 곡선 |
-| Curves_TilePalette | 수동 곡선 부품 |
-| MainMap_TilePalette | 기존 기본 타일과 안쪽 꼭짓점 마감 |
-| CurveBorders_Dark / CurveBorders_Ivory | 검정·아이보리 수동 외곽선 조합 |
+| Ground_Auto_TilePalette | 자동 사각 지형과 자동 곡선 |
+| Ground_Manual_Shapes_TilePalette | 왼쪽 `Manual Shapes`: 수동 곡선·기본 부품. 오른쪽 `Base / Inner Join`: 기존 타일과 안쪽 꼭짓점 마감 |
+| Ground_Manual_CurveBorders_TilePalette | 왼쪽 `Dark`, 오른쪽 `Ivory`: 수동 외곽선 32조합 |
+
+수동 기본·곡선에서 픽셀·크기·색·충돌·잠금·셀 변환이 같은 낱개 모양은 한 번만 둔다. 여러 셀로 된 곡선 묶음과 빈 공간은 유지하며, 자동 타일과 수동 타일은 구분한다. 외곽선 마스크는 결과가 같아 보여도 선 선택 용도가 다르므로 32조합을 유지한다. 팔레트를 통합해도 기존 씬에서 사용하는 Tile·Sprite의 ID와 설정은 바꾸지 않는다.
+
+`Ground_Manual_Shapes_TilePalette`는 **Cell Sizing: Manual**, Grid의 **Cell Size: (1, 1, 1)**을 유지한다. 가는 부품과 2×2·3×3 단일 Sprite가 함께 있어 Automatic에서는 셀이 3×3으로 계산되고 1×1 조각들이 떨어져 보인다. 팔레트 통합·수정 뒤에는 저장된 프리팹뿐 아니라 실제 Tile Palette 창을 다시 열어 셀 크기와 곡선 묶음의 접합을 확인한다.
 
 - 사각 지형은 맨 아래 `Square` 한 칸을 집어 칠한다.
 - 곡선·아치는 원하는 형태의 묶음 전체를 집어 칠한다. 빈 칸도 선택 영역에 포함한다.
@@ -50,11 +53,11 @@ Unity Tile Palette에서 **AutoPlatforms_TilePalette**를 선택한다. 왼쪽 �
 
 자동 `Square`는 인접한 두 면이 연결되고 대각선이 비어 있으면 해당 꼭짓점에 마감을 표시한다. 대각선을 채우면 마감이 사라지고, 지우면 다시 나타난다. 네 방향과 여러 꼭짓점의 동시 마감을 지원하며, 검정·아이보리의 기존 선 색과 두께를 따른다. 타일의 충돌 도형은 기존 외곽선 조합과 같다.
 
-수동으로 지정하려면 **MainMap_TilePalette 맨 아래 Inner Join** 두 행을 사용한다. 각 행은 오른쪽 위 → 오른쪽 아래 → 왼쪽 아래 → 왼쪽 위 순서다. 검정은 y=-38, 아이보리는 y=-41이며 x=0, 3, 6, 9다. 기존 타일을 해당 마감 타일로 교체해 칠한다. 자동 처리 대상은 사각 타일이며, 곡선 부품의 형태를 바꾸지는 않는다.
+수동으로 지정하려면 **Ground_Manual_Shapes_TilePalette 오른쪽 Base / Inner Join 영역의 맨 아래 Inner Join** 두 행을 사용한다. 각 행은 오른쪽 위 → 오른쪽 아래 → 왼쪽 아래 → 왼쪽 위 순서다. 검정은 y=-38, 아이보리는 y=-41이며 x=44, 47, 50, 53이다. 기존 타일을 해당 마감 타일로 교체해 칠한다. 자동 처리 대상은 사각 타일이며, 곡선 부품의 형태를 바꾸지는 않는다.
 
 ## 수동 외곽선
 
-특정 부분의 선을 직접 지정하려면 **CurveBorders_Dark / CurveBorders_Ivory** 팔레트를 사용한다.
+특정 부분의 선을 직접 지정하려면 **Ground_Manual_CurveBorders_TilePalette**를 사용한다. `Dark` 영역은 x=0에서, `Ivory` 영역은 x=44에서 시작하며 색별 부품·마스크의 상대 배치는 같다.
 
 T=위, R=오른쪽, B=아래, L=왼쪽, C=곡선이다. None은 선 없음이다. 아치의 C는 안쪽 원호를 뜻한다. 예를 들어 TLC는 곡선과 위·왼쪽에 선을 넣는다.
 

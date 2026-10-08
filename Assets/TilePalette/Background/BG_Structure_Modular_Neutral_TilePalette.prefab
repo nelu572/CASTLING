@@ -224,7 +224,7 @@ GameObject:
   - component: {fileID: 8439207870957974699}
   - component: {fileID: 5519285536696329778}
   m_Layer: 0
-  m_Name: BG_Structure_Neutral_TilePalette
+  m_Name: BG_Structure_Modular_Neutral_TilePalette
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

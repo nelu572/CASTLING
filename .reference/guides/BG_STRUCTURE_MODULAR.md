@@ -12,9 +12,12 @@
 
 ## 팔레트
 
-- `BG_Structure_Modular_Near_TilePalette` / `BG_Structure_Modular_Far_TilePalette`: 기존 Near·Far 색을 가진 타일이다. 새 배경의 명도 기준으로 고정하지 않는다.
-- `BG_Structure_Neutral_TilePalette`: 기존 모듈형 Sprite를 쓰는 중성 타일이다. 셀별 색을 편집할 때 사용한다.
-- 팔레트 위쪽 왼쪽은 바깥 모서리, 오른쪽은 안쪽 곡선이다. 각 줄은 TL / TR / BR / BL 방향 순서다.
+- 이름은 `영역_용도_변형_TilePalette` 형식을 사용하며 배경은 `BG_`로 시작한다. 변형이 없으면 해당 부분은 생략한다.
+- `BG_Structure_Modular_TilePalette`: 왼쪽 `Near`는 x=0, 오른쪽 `Far`는 x=52에서 시작한다. 같은 모양의 두 색 계열을 한 팔레트에서 고른다. 기존 Near·Far 색은 새 배경의 명도 기준으로 고정하지 않는다.
+- `BG_Structure_Modular_Neutral_TilePalette`: 셀별 색 편집용 중성 타일이다. 현재 팔레트에는 채움 사각형과 ¼칸 바깥 곡선 4방향을 둔다.
+- `BG_Structure_Pieces_TilePalette`: 기존 배경 낱개 부품 38개다. `Pieces`에서 같은 픽셀·크기·색·셀 설정의 중복을 제외했으며, 오른쪽 `Custom Shapes`의 조합과 셀 색을 보존한다.
+- `BG_Structure_Stamps_TilePalette`: 큰 크기의 고정 부품과 조합 예시다. 낱개 부품과 사용 단위가 달라 별도 팔레트로 유지한다.
+- Modular 팔레트의 각 색 영역 위쪽 왼쪽은 바깥 모서리, 오른쪽은 안쪽 곡선이다. 각 줄은 TL / TR / BR / BL 방향 순서다.
 - 위에서 아래로 반경 ¼, ½, 1, 2, 3칸의 원호, 가로 3×세로 1칸 타원, 가로 1×세로 3칸 타원 순서다.
 - 그 아래에는 채움 사각형과 ½칸·1칸 사선 모서리가 있다.
 - 맨 아래에는 사각 기둥, 둥근 기둥, 둥근 돔, 아치, 원, 납작한 돔 조합 예시가 있다.
@@ -33,7 +36,8 @@
 
 - Sprite atlas: [BG_Structure_Modular.png](../../Assets/Sprite/Map/Background/Structures/Modular/BG_Structure_Modular.png)
 - Unity Tile: `Assets/TilePalette/Background/ModularTiles/Near`, `Far`, `Neutral.asset`
-- Palette prefab: `Assets/TilePalette/Background/BG_Structure_Modular_{Near,Far}_TilePalette.prefab`, `BG_Structure_Neutral_TilePalette.prefab`
+- Palette prefab: `Assets/TilePalette/Background/BG_Structure_Modular_TilePalette.prefab`, `BG_Structure_Modular_Neutral_TilePalette.prefab`
+- 기존 부품·고정 조합: `Assets/TilePalette/Background/BG_Structure_Pieces_TilePalette.prefab`, `BG_Structure_Stamps_TilePalette.prefab`. 팔레트에서 중복을 정리해도 씬이 사용하는 원본 Tile·Sprite 참조는 유지한다.
 - Texture는 Uncompressed / Point / Full Rect / mipmap 없음 / Sprite 간 2px 여백이다.
 - GridPalette.CellSizing은 Manual, Grid.cellSize는 (1,1,1)이다.
 
