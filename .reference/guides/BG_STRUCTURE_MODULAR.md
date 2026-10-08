@@ -1,5 +1,15 @@
 # 배경 구조물 조립 타일
 
+## 배경 바탕
+
+- `BG_Base_TilePalette`를 선택하고 룸의 `BackGround/BaseColor`를 Active Tilemap으로 지정한다.
+- 기존 베이지·청회색 타일 오른쪽 `(1, 1)`의 `TileMap_BackGroundBase_Gray`는 그림 자체에 회색을 넣은 1×1 단색 채움 타일이다. [PNG](../../Assets/Sprite/Map/Background/Base/TileMap_BackGroundBase_Gray.png)와 [Tile](../../Assets/TilePalette/Background/Tiles/TileMap_BackGroundBase_Gray.asset)을 사용한다.
+- Tilemap과 셀 색은 흰색으로 유지하면 팔레트에 보이는 원본 색으로 칠할 수 있다. Transform Scale은 1이며 Collider는 추가하지 않는다.
+- 기본색은 타일로 편집한다. 그라데이션이 필요하면 기본색 위에서 명도를 변화시키는 별도 효과로 다룬다. 현재 회색 타일에는 그라데이션이 없다.
+- `Chapter_01`의 `BackGround/BrightnessGradient`는 [흑백 알파 PNG](../../Assets/Sprite/Map/Background/Base/BG_BrightnessGradient.png)를 BaseColor 위·구조물 뒤에 한 장으로 표시한다. 위쪽은 밝고 아래쪽은 어두우며, 타일마다 반복하지 않는다.
+- `BrightnessGradient`의 SpriteRenderer Color는 RGB를 흰색으로 유지하고 A로 강도를 조절한다. A=0이면 효과가 꺼지고, A=1이면 PNG의 명도 차이가 그대로 적용된다. Size로 적용 범위를 맞추고 Transform Scale은 1로 유지한다. 끄면 원래 BaseColor만 보인다.
+- 그라데이션 PNG는 Bilinear / Clamp / Uncompressed / mipmap 없음으로 Import한다. 단색 타일·모듈의 Point 설정과 구분한다.
+
 ## 팔레트
 
 - `BG_Structure_Modular_Near_TilePalette` / `BG_Structure_Modular_Far_TilePalette`: 기존 Near·Far 색을 가진 타일이다. 새 배경의 명도 기준으로 고정하지 않는다.
