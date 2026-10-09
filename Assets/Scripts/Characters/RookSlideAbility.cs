@@ -73,6 +73,23 @@ public sealed class RookSlideAbility : MonoBehaviour
         }
     }
 
+    public bool TryJump()
+    {
+        if (!IsMoving)
+        {
+            return false;
+        }
+
+        if (movement.HasGroundContact)
+        {
+            float horizontalSpeed = Direction * settings.MaximumRunSpeed * 2f;
+            StopSlide();
+            movement.RequestBoostedJump(horizontalSpeed);
+        }
+
+        return true;
+    }
+
     private void OnCollisionEnter2D(Collision2D collision) => StopAtTerrain(collision);
     private void OnCollisionStay2D(Collision2D collision) => StopAtTerrain(collision);
 

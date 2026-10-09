@@ -17,6 +17,12 @@ public sealed class PlayerMovement : MonoBehaviour
     private float jumpBufferedUntil = float.NegativeInfinity;
     private bool wasGrounded;
     private bool hasInitializedGroundState;
+    private float bufferedJumpHorizontalSpeed;
+    private float jumpHorizontalSpeed;
+    private bool hasBufferedJumpSpeed;
+    private bool preserveJumpSpeed;
+
+    public bool HasGroundContact => IsGrounded(out _);
 
     public event Action<float> HorizontalInputChanged;
     public event Action<bool> WalkingUpdated;
@@ -44,6 +50,8 @@ public sealed class PlayerMovement : MonoBehaviour
     {
         horizontalInput = 0f;
         jumpBufferedUntil = float.NegativeInfinity;
+        hasBufferedJumpSpeed = false;
+        preserveJumpSpeed = false;
     }
 
     public void SetHorizontalInput(float input)
@@ -55,6 +63,14 @@ public sealed class PlayerMovement : MonoBehaviour
     public void RequestJump()
     {
         jumpBufferedUntil = Time.time + settings.JumpBufferTime;
+        hasBufferedJumpSpeed = false;
+    }
+
+    public void RequestBoostedJump(float horizontalSpeed)
+    {
+        RequestJump();
+        bufferedJumpHorizontalSpeed = horizontalSpeed;
+        hasBufferedJumpSpeed = true;
     }
 
     public void ClearGroundedHistory()
@@ -83,6 +99,7 @@ public sealed class PlayerMovement : MonoBehaviour
         WalkingUpdated?.Invoke(hasMoveInput && hasGroundContact);
         if (justLanded)
         {
+            preserveJumpSpeed = false;
             Landed?.Invoke();
         }
 
@@ -97,9 +114,25 @@ public sealed class PlayerMovement : MonoBehaviour
         if (jumpBufferedUntil >= Time.time && canJump)
         {
             velocity.y = settings.JumpSpeed;
+            if (hasBufferedJumpSpeed)
+            {
+                jumpHorizontalSpeed = bufferedJumpHorizontalSpeed;
+                preserveJumpSpeed = true;
+            }
+            hasBufferedJumpSpeed = false;
             jumpBufferedUntil = float.NegativeInfinity;
             lastGroundedAt = float.NegativeInfinity;
             Jumped?.Invoke();
+        }
+
+        if (jumpBufferedUntil < Time.time)
+        {
+            hasBufferedJumpSpeed = false;
+        }
+
+        if (preserveJumpSpeed)
+        {
+            velocity.x = jumpHorizontalSpeed;
         }
 
         body.gravityScale = velocity.y < 0f
