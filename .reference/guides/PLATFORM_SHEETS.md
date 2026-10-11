@@ -58,18 +58,20 @@
 
 1. **Ground_NoOutline_TilePalette**에서 모양을 골라 Ground에 칠한다. 기본·곡선은 기존 자동 팔레트와 같은 배치이며 혼합색은 x=48·64에 있다. Cell Sizing은 Manual, Cell Size는 (1, 1, 1)이다.
 2. Ground 또는 부모 Grid를 선택하고 **Tools > CASTLING > Platform Outlines > Rebuild Selected Grid**를 실행한다. Grid에 `PlatformOutlineBake`가 있으면 Inspector의 **외곽선 다시 계산** 버튼도 사용할 수 있다.
-3. 기존 지형 Tile은 선 없는 Tile로 바꾸고, 전체 지형과 빈 공간 사이의 경계에 별도 Sprite 외곽선을 저장한다. 색·셀 변환·Sprite Physics Shape·Collider Type은 보존한다. Chapter_01의 현재 Ground에는 이 방식을 적용해 두었다.
+3. 기존 지형 Tile은 선 없는 Tile로 바꾸고, 전체 지형과 빈 공간 사이의 경계에 별도 Sprite 외곽선을 표시한다. 색·셀 변환·Sprite Physics Shape·Collider Type은 보존한다. Chapter_01의 현재 Ground에는 이 방식을 적용해 두었다.
 4. Grid의 **Rebuild While Editing**은 기본으로 켜져 있으며, Chapter_01에도 켜 두었다. 칠하기·지우기가 끝나면 외곽선이 자동 갱신되고 타일 편집과 함께 Undo/Redo된다. 대량 편집 중 갱신을 잠시 끄면 지형 수정 뒤 **외곽선 다시 계산** 버튼을 누른다.
 
 - **Width Pixels**는 128 PPU 기준 두께이며 1~64px이다. 초기값 14px은 기존 플랫폼 그림의 선 두께를 따른다.
 - 색이 달라도 내부의 맞닿은 면에는 선이 생기지 않는다. 부분 접합과 다른 Tilemap으로 메운 곡선도 전체 Sprite 알파 실루엣의 합집합으로 계산한다. 충돌 없는 배경은 기본 계산 대상에서 제외한다.
 - **Sources**가 비어 있으면 같은 Grid의 활성 TilemapCollider2D가 있는 Tilemap을 찾는다. 다른 지형 Tilemap을 추가·제외했으면 Sources를 비우거나 직접 갱신하고 다시 계산한다. 일반 Tile과 PlatformBorderTile을 지원하며, 다른 종류의 타일은 지형을 바꾸기 전에 계산을 중단한다.
-- Grid 아래 `PlatformOutlines`는 생성 결과다. 직접 칠하거나 Collider를 추가하지 않는다. 런타임에는 계산하지 않으며 저장된 SpriteRenderer만 표시한다. Play 전에 필요한 재계산을 끝내고 씬을 저장한다.
-- 결과 PNG는 `Assets/Sprite/Map/Platforms/GeneratedOutlines/`에 저장한다. 비어 있는 부분을 잘라 텍스처 크기를 줄이고, 같은 내용은 재사용한다. 이전 결과를 덮어쓰지 않아 Editor Undo가 이전 이미지를 참조할 수 있다. 이 폴더는 게임 에셋이며 일회성 캡처 폴더가 아니다. 오래된 파일의 정리는 씬·프리팹 참조와 필요한 Undo 상태가 끝난 뒤 Unity AssetDatabase를 통해 수행한다.
+- Grid 아래 `PlatformOutlines`는 생성 결과다. 직접 칠하거나 Collider를 추가하지 않는다. 런타임에는 계산하지 않으며 저장된 SpriteRenderer만 표시한다. 자동 갱신을 껐으면 Play 전에 재계산하고 씬을 저장한다.
+- 편집 중 외곽선은 메모리에서 생성하며 개별 PNG를 만들지 않는다. Undo/Redo는 복원된 지형에서 외곽선을 다시 계산한다. 씬을 저장하면 같은 폴더의 `<씬 이름>.platformoutlines` 한 파일에 현재 결과만 저장한다. 비어 있는 부분을 잘라 이미지 크기를 줄이고, 좌표가 달라도 같은 이미지는 공유한다. 이 파일과 `.meta`는 게임 에셋이므로 함께 보존한다.
+- `.platformoutlines`는 압축된 이미지들을 담은 생성 에셋이다. `PlatformOutlineImporter`가 Texture·Sprite 하위 에셋으로 Import하므로 게임 실행 시 이미지 디코딩·외곽선 계산은 하지 않는다. 직접 편집하지 않고 지형과 계산 설정을 바꾼 뒤 씬을 저장해 갱신한다. 씬을 다른 이름으로 저장하면 새 씬에 대응하는 파일을 만든다.
+- 저장하지 않은 상태에서 Editor Play에 들어갈 때도 미리 Import한다. 이때 마지막으로 저장된 씬의 Sprite 참조를 보호하기 위해 이전 결과를 잠시 유지하며, 다음 씬 저장 때 현재 결과만 남긴다. 플레이 후 저장하지 않은 지형을 버리면 저장된 씬의 외곽선은 그대로 열 수 있다.
 - 기존 원본의 선을 제거해 새 Sprite가 필요한 경우 `GeneratedFills/`에 PNG와 원본 Physics Shape를 함께 Import한다. 원본 Sprite·Tile ID는 유지한다. 새 팔레트 최초 생성은 **Create No Outline Palette** 메뉴를 사용하며, 이미 존재하는 팔레트는 덮어쓰지 않는다.
 - 큰 지형에서는 전체 계산 시간이 늘어나므로 수동 버튼으로 묶어서 갱신할 수 있다. Tilemap의 배치·색·변환이나 선 두께를 Inspector에서 직접 바꿨을 때도 버튼으로 재계산한다. 자동 갱신은 Tilemap의 타일 변경 이벤트를 대상으로 한다.
 
-Editor 구현은 `Assets/Editor/PlatformFillAuthoring.cs`와 `PlatformOutlineAuthoring.cs`에 있고, 저장용 컴포넌트·라이브러리는 `Assets/Scripts/Environment/PlatformOutlineBake.cs`와 `PlatformFillLibrary.cs`에 있다. 충돌·브러시·화면 확인은 [Unity 변경 검증](../../.codex/skills/UNITY_VERIFY.md)을 따른다.
+Editor 구현은 `Assets/Editor/PlatformFillAuthoring.cs`, `PlatformOutlineAuthoring.cs`, `PlatformOutlineImporter.cs`에 있고, 저장용 컴포넌트·라이브러리는 `Assets/Scripts/Environment/PlatformOutlineBake.cs`, `PlatformOutlineAsset.cs`, `PlatformFillLibrary.cs`에 있다. 충돌·브러시·화면 확인은 [Unity 변경 검증](../../.codex/skills/UNITY_VERIFY.md)을 따른다.
 
 ## 흑백 사이의 곡선 경계
 

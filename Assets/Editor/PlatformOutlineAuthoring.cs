@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using Object = UnityEngine.Object;
 
@@ -12,7 +14,7 @@ public static class PlatformOutlineAuthoring
 {
     private const int PixelsPerUnit = 128;
     private const int ChunkPixels = 1024;
-    private const string OutputFolder = "Assets/Sprite/Map/Platforms/GeneratedOutlines";
+    private const int WithoutUndo = int.MinValue;
     private static readonly Dictionary<PlatformOutlineBake, int> Pending = new Dictionary<PlatformOutlineBake, int>();
     private static bool rebuilding;
 
@@ -30,7 +32,11 @@ public static class PlatformOutlineAuthoring
     static PlatformOutlineAuthoring()
     {
         Tilemap.tilemapTileChanged += Changed;
-        Undo.undoRedoPerformed += ClearPending;
+        Undo.undoRedoPerformed += RestoreAfterUndo;
+        EditorSceneManager.sceneSaving += SaveScene;
+        EditorSceneManager.sceneClosing += ReleaseScenePreviews;
+        EditorApplication.playModeStateChanged += PlayModeChanged;
+        EditorApplication.delayCall += RestoreMissingPreviews;
     }
 
     private static void Changed(Tilemap map, Tilemap.SyncTile[] changes)
@@ -45,16 +51,76 @@ public static class PlatformOutlineAuthoring
 
     private static void Flush()
     {
-        if (GUIUtility.hotControl != 0) return;
+        FlushPending(false);
+    }
+
+    private static void FlushPending(bool force)
+    {
+        if (!force && GUIUtility.hotControl != 0) return;
         var pending = new Dictionary<PlatformOutlineBake, int>(Pending);
         ClearPending();
-        foreach (var item in pending) if (item.Key != null) Rebuild(item.Key, true, item.Value);
+        foreach (var item in pending) if (item.Key != null) Rebuild(item.Key, item.Value);
     }
 
     private static void ClearPending()
     {
         Pending.Clear();
         EditorApplication.update -= Flush;
+    }
+
+    private static PlatformOutlineBake[] Bakes(Scene scene)
+    {
+        var result = new List<PlatformOutlineBake>();
+        foreach (var root in scene.GetRootGameObjects()) result.AddRange(root.GetComponentsInChildren<PlatformOutlineBake>(true));
+        return result.ToArray();
+    }
+
+    private static void RestoreAfterUndo()
+    {
+        ClearPending();
+        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+            foreach (var bake in Bakes(SceneManager.GetSceneAt(i))) Pending[bake] = WithoutUndo;
+        EditorApplication.update += Flush;
+    }
+
+    private static void ReleaseScenePreviews(Scene scene, bool removingScene)
+    {
+        foreach (var bake in Bakes(scene))
+            if (bake.generatedRoot != null)
+            {
+                var sprites = new List<Sprite>();
+                foreach (var renderer in bake.generatedRoot.GetComponentsInChildren<SpriteRenderer>(true)) sprites.Add(renderer.sprite);
+                ReleasePreviews(sprites);
+            }
+    }
+
+    private static void RestoreMissingPreviews()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+            foreach (var bake in Bakes(SceneManager.GetSceneAt(i)))
+                if (bake.generatedRoot != null)
+                    foreach (var renderer in bake.generatedRoot.GetComponentsInChildren<SpriteRenderer>(true))
+                        if (renderer.sprite == null) { Rebuild(bake, WithoutUndo); break; }
+    }
+
+    private static void PlayModeChanged(PlayModeStateChange state)
+    {
+        if (state != PlayModeStateChange.ExitingEditMode) return;
+        FlushPending(true);
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            var scene = SceneManager.GetSceneAt(i);
+            // Keep the saved scene's older subassets until that scene is actually saved.
+            if (!string.IsNullOrEmpty(scene.path)) SaveSceneOutlines(scene, scene.path, false);
+        }
+    }
+
+    private static void SaveScene(Scene scene, string path)
+    {
+        FlushPending(true);
+        SaveSceneOutlines(scene, path, true);
     }
 
     [MenuItem("Tools/CASTLING/Platform Outlines/Rebuild Selected Grid")]
@@ -67,25 +133,26 @@ public static class PlatformOutlineAuthoring
         var bake = grid.GetComponent<PlatformOutlineBake>();
         Undo.IncrementCurrentGroup(); int group = Undo.GetCurrentGroup();
         if (bake == null) bake = Undo.AddComponent<PlatformOutlineBake>(grid.gameObject);
-        Rebuild(bake, true, group);
+        Rebuild(bake, group);
     }
 
-    public static void Rebuild(PlatformOutlineBake bake, bool persist = true, int undoGroup = -1)
+    public static void Rebuild(PlatformOutlineBake bake, int undoGroup = -1)
     {
         if (rebuilding) return;
-        if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Edit Mode only.");
+        if (EditorApplication.isPlaying) throw new InvalidOperationException("Edit Mode only.");
         var grid = bake.GetComponent<Grid>();
         if (grid == null) throw new InvalidOperationException("PlatformOutlineBake requires a Grid.");
         int width = Mathf.Clamp(bake.widthPixels, 1, 64);
         int halo = width + 2;
         int side = ChunkPixels + 2 * halo;
         rebuilding = true;
-        if (undoGroup < 0) { Undo.IncrementCurrentGroup(); undoGroup = Undo.GetCurrentGroup(); }
-        Undo.SetCurrentGroupName("Rebuild platform outlines");
+        bool recordUndo = undoGroup != WithoutUndo;
+        if (recordUndo && undoGroup < 0) { Undo.IncrementCurrentGroup(); undoGroup = Undo.GetCurrentGroup(); }
+        if (recordUndo) Undo.SetCurrentGroupName("Rebuild platform outlines");
         var newRoot = new GameObject("PlatformOutlines");
         UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(newRoot, bake.gameObject.scene);
         newRoot.transform.SetParent(bake.transform, false);
-        Undo.RegisterCreatedObjectUndo(newRoot, "Rebuild platform outlines");
+        var sprites = new Dictionary<string, Sprite>();
         try
         {
             PlatformFillAuthoring.OpenLibrary();
@@ -108,7 +175,7 @@ public static class PlatformOutlineAuthoring
             }
             foreach (var map in maps)
             {
-                Undo.RegisterCompleteObjectUndo(map, "Rebuild platform outlines");
+                if (recordUndo) Undo.RegisterCompleteObjectUndo(map, "Rebuild platform outlines");
                 foreach (var cell in map.cellBounds.allPositionsWithin)
                 {
                     var source = map.GetTile(cell); if (source == null) continue;
@@ -132,7 +199,7 @@ public static class PlatformOutlineAuthoring
             int finished = 0;
             foreach (var chunk in chunks)
             {
-                if (persist) EditorUtility.DisplayProgressBar("Platform outlines", "Calculating exposed boundaries", (float)finished++ / chunks.Count);
+                EditorUtility.DisplayProgressBar("Platform outlines", "Calculating exposed boundaries", (float)finished++ / chunks.Count);
                 int originX = chunk.x * ChunkPixels - halo, originY = chunk.y * ChunkPixels - halo;
                 var coverage = new byte[side * side];
                 var ink = new Color32[side * side];
@@ -158,13 +225,7 @@ public static class PlatformOutlineAuthoring
                     name = "PlatformOutline", filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp
                 };
                 texture.SetPixels32(cropped); texture.Apply();
-                Sprite sprite;
-                if (persist)
-                {
-                    sprite = SaveChunk(texture, chunk);
-                    Object.DestroyImmediate(texture);
-                }
-                else sprite = Sprite.Create(texture, new Rect(0, 0, textureWidth, textureHeight), Vector2.zero, PixelsPerUnit);
+                var sprite = CreatePreview(texture, sprites);
                 var child = new GameObject("Outline_" + chunk.x + "_" + chunk.y, typeof(SpriteRenderer));
                 UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(child, newRoot.scene);
                 child.transform.SetParent(newRoot.transform, false);
@@ -176,16 +237,49 @@ public static class PlatformOutlineAuthoring
                 renderer.sortingOrder = sourceRenderer.sortingOrder;
                 renderer.sharedMaterial = sourceRenderer.sharedMaterial;
             }
-            Undo.RegisterCompleteObjectUndo(bake, "Rebuild platform outlines");
-            if (bake.generatedRoot != null) Undo.DestroyObjectImmediate(bake.generatedRoot);
-            bake.generatedRoot = newRoot; bake.sources = maps;
+            if (recordUndo) Undo.RegisterCompleteObjectUndo(bake, "Rebuild platform outlines");
+            // Generated children are derived state; Undo restores the tiles and recalculates them.
+            // Keeping the root stable avoids Undo references to deleted preview objects.
+            if (bake.generatedRoot != null)
+            {
+                var oldSprites = new List<Sprite>();
+                foreach (var renderer in bake.generatedRoot.GetComponentsInChildren<SpriteRenderer>(true)) oldSprites.Add(renderer.sprite);
+                var retained = new HashSet<Transform>();
+                while (newRoot.transform.childCount > 0)
+                {
+                    var child = newRoot.transform.GetChild(0);
+                    var existing = bake.generatedRoot.transform.Find(child.name);
+                    if (existing != null && existing.GetComponent<SpriteRenderer>() != null)
+                    {
+                        var source = child.GetComponent<SpriteRenderer>();
+                        var renderer = existing.GetComponent<SpriteRenderer>();
+                        renderer.sprite = source.sprite; renderer.sharedMaterial = source.sharedMaterial;
+                        renderer.sortingLayerID = source.sortingLayerID; renderer.sortingOrder = source.sortingOrder;
+                        existing.localPosition = child.localPosition;
+                        retained.Add(existing); Object.DestroyImmediate(child.gameObject);
+                    }
+                    else { child.SetParent(bake.generatedRoot.transform, false); retained.Add(child); }
+                }
+                for (int i = bake.generatedRoot.transform.childCount - 1; i >= 0; i--)
+                    if (!retained.Contains(bake.generatedRoot.transform.GetChild(i))) Object.DestroyImmediate(bake.generatedRoot.transform.GetChild(i).gameObject);
+                Object.DestroyImmediate(newRoot);
+                ReleasePreviews(oldSprites);
+            }
+            else
+            {
+                if (recordUndo) Undo.RegisterCreatedObjectUndo(newRoot, "Rebuild platform outlines");
+                bake.generatedRoot = newRoot;
+            }
+            bake.sources = maps;
             EditorUtility.SetDirty(bake);
-            if (persist) PlatformFillAuthoring.Finish();
-            Undo.CollapseUndoOperations(undoGroup);
+            PlatformFillAuthoring.Finish();
+            if (recordUndo) Undo.CollapseUndoOperations(undoGroup);
         }
         catch
         {
-            Undo.RevertAllDownToGroup(undoGroup);
+            if (newRoot != null) Object.DestroyImmediate(newRoot);
+            ReleasePreviews(sprites.Values);
+            if (recordUndo) Undo.RevertAllDownToGroup(undoGroup);
             throw;
         }
         finally { EditorUtility.ClearProgressBar(); rebuilding = false; }
@@ -297,29 +391,82 @@ public static class PlatformOutlineAuthoring
         }
     }
 
-    private static Sprite SaveChunk(Texture2D texture, Vector2Int chunk)
+    private static string SpriteName(Texture2D texture)
     {
-        if (!AssetDatabase.IsValidFolder(OutputFolder)) AssetDatabase.CreateFolder("Assets/Sprite/Map/Platforms", "GeneratedOutlines");
-        byte[] bytes = ImageConversion.EncodeToPNG(texture);
-        string hash;
-        using (var sha = SHA256.Create()) hash = BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-", "").Substring(0, 16);
-        var path = OutputFolder + "/Outline_" + chunk.x + "_" + chunk.y + "_" + hash + ".png";
-        // Content-addressed files keep old Undo states valid instead of overwriting their images.
-        if (!File.Exists(path))
+        using (var sha = SHA256.Create())
+            return "Outline_" + BitConverter.ToString(sha.ComputeHash(ImageConversion.EncodeToPNG(texture))).Replace("-", "");
+    }
+
+    private static Sprite CreatePreview(Texture2D texture, Dictionary<string, Sprite> sprites)
+    {
+        texture = PlatformOutlineImporter.PrepareTexture(texture);
+        string name = SpriteName(texture);
+        Sprite sprite;
+        if (sprites.TryGetValue(name, out sprite)) { Object.DestroyImmediate(texture); return sprite; }
+        // Keep previews serializable by Unity's temporary Play snapshot, including untitled scenes.
+        // The sceneSaving callback replaces them with imported subassets before a disk save.
+        sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero, PixelsPerUnit, 0, SpriteMeshType.FullRect);
+        sprite.name = name;
+        sprites.Add(name, sprite);
+        return sprite;
+    }
+
+    private static void ReleasePreviews(IEnumerable<Sprite> sprites)
+    {
+        var textures = new HashSet<Texture2D>();
+        foreach (var sprite in new HashSet<Sprite>(sprites))
         {
-            File.WriteAllBytes(path, bytes); AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
-            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
-            importer.textureType = TextureImporterType.Sprite; importer.spriteImportMode = SpriteImportMode.Single;
-            importer.spritePixelsPerUnit = PixelsPerUnit; importer.spritePivot = Vector2.zero;
-            var settings = new TextureImporterSettings(); importer.ReadTextureSettings(settings);
-            settings.spriteAlignment = (int)SpriteAlignment.Custom; settings.spritePivot = Vector2.zero;
-            importer.SetTextureSettings(settings);
-            importer.mipmapEnabled = false; importer.textureCompression = TextureImporterCompression.Uncompressed;
-            importer.npotScale = TextureImporterNPOTScale.None;
-            importer.filterMode = FilterMode.Bilinear; importer.wrapMode = TextureWrapMode.Clamp;
-            importer.alphaIsTransparency = true; importer.SaveAndReimport();
+            if (sprite == null || EditorUtility.IsPersistent(sprite)) continue;
+            textures.Add(sprite.texture); Object.DestroyImmediate(sprite);
         }
-        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        foreach (var texture in textures)
+            if (texture != null && !EditorUtility.IsPersistent(texture)) Object.DestroyImmediate(texture);
+    }
+
+    private static void SaveSceneOutlines(Scene scene, string scenePath, bool prune)
+    {
+        var renderers = new List<SpriteRenderer>();
+        foreach (var bake in Bakes(scene))
+            if (bake.generatedRoot != null) renderers.AddRange(bake.generatedRoot.GetComponentsInChildren<SpriteRenderer>(true));
+        string path = Path.ChangeExtension(scenePath, ".platformoutlines");
+        if (renderers.Count == 0 && !File.Exists(path)) return;
+        var images = new SortedDictionary<string, byte[]>(StringComparer.Ordinal);
+        var previous = AssetDatabase.LoadAssetAtPath<PlatformOutlineAsset>(path);
+        if (!prune && previous != null)
+            foreach (var sprite in previous.sprites) images[sprite.name] = ImageConversion.EncodeToPNG(sprite.texture);
+        var names = new List<string>();
+        var previews = new List<Sprite>();
+        foreach (var renderer in renderers)
+        {
+            if (renderer.sprite == null) throw new InvalidOperationException("Missing platform outline. Rebuild before saving.");
+            var texture = PlatformFillAuthoring.ReadTexture(renderer.sprite.texture);
+            string name = SpriteName(texture);
+            if (!images.ContainsKey(name)) images.Add(name, ImageConversion.EncodeToPNG(texture));
+            names.Add(name); previews.Add(renderer.sprite);
+        }
+        byte[] bytes;
+        using (var stream = new MemoryStream())
+        {
+            using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8, true))
+            {
+                writer.Write("CASTLING_PLATFORM_OUTLINES"); writer.Write(1); writer.Write(images.Count);
+                foreach (var image in images) { writer.Write(image.Key); writer.Write(image.Value.Length); writer.Write(image.Value); }
+            }
+            bytes = stream.ToArray();
+        }
+        bool changed = !File.Exists(path) || !System.Linq.Enumerable.SequenceEqual(File.ReadAllBytes(path), bytes);
+        if (changed)
+        {
+            File.WriteAllBytes(path, bytes);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+        }
+        var saved = AssetDatabase.LoadAssetAtPath<PlatformOutlineAsset>(path);
+        if (saved == null) throw new InvalidOperationException("Failed to import platform outlines: " + path);
+        var byName = new Dictionary<string, Sprite>();
+        foreach (var sprite in saved.sprites) byName.Add(sprite.name, sprite);
+        for (int i = 0; i < renderers.Count; i++) renderers[i].sprite = byName[names[i]];
+        ReleasePreviews(previews);
+        PlatformFillAuthoring.Finish();
     }
 }
 
