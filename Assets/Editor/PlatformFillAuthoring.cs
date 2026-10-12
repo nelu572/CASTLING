@@ -164,12 +164,14 @@ public static class PlatformFillAuthoring
 
     public static void Finish()
     {
-        if (library != null) { EditorUtility.SetDirty(library); AssetDatabase.SaveAssetIfDirty(library); }
+        // GetFill marks actual library changes dirty. Ordinary terrain edits only
+        // change the scene and must not rewrite the tile library on every stroke.
+        if (library != null) AssetDatabase.SaveAssetIfDirty(library);
         foreach (var texture in Raw.Values) Object.DestroyImmediate(texture);
         Raw.Clear();
     }
 
-    [MenuItem("Tools/CASTLING/Platform Outlines/Create No Outline Palette")]
+    [MenuItem("Tools/CASTLING/플랫폼 외곽선/선 없는 팔레트 생성")]
     public static void CreatePalette()
     {
         if (AssetDatabase.LoadAssetAtPath<GameObject>(PalettePath) != null) return;

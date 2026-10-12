@@ -16,7 +16,7 @@ internal static class RoomAuthoring
         if (!TryGetSelectedRoom(out RoomArea source, out Transform roomsRoot)) return;
         if (AnimationMode.InAnimationMode())
         {
-            EditorUtility.DisplayDialog("룸 복제", "Animation Mode 또는 Live Camera & Parallax Preview를 끈 뒤 다시 실행하세요.", "확인");
+            EditorUtility.DisplayDialog("룸 복제", "Animation Mode 또는 카메라·패럴랙스 실시간 미리보기를 끈 뒤 다시 실행하세요.", "확인");
             return;
         }
 

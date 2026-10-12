@@ -2,7 +2,7 @@
 
 현재 `Dev_Gameplay`은 한 씬의 `Grid` 아래에 여러 룸을 두는 구조다. 각 룸은 자기 지형, 배경, 카메라 경계, 입장 지점, 출구를 가진다.
 
-룸 복제·Live Camera & Parallax Preview 도구는 현재 `Dev_Gameplay` 전용이다. 시작 위치 도구는 현재 편집 씬의 `RoomTransitionController`와 연결된 룸 구성을 기준으로 동작한다.
+룸 복제·카메라·패럴랙스 실시간 미리보기 도구는 현재 `Dev_Gameplay` 전용이다. 시작 위치 도구는 현재 편집 씬의 `RoomTransitionController`와 연결된 룸 구성을 기준으로 동작한다.
 
 ```text
 Grid
@@ -22,7 +22,7 @@ Grid
 
 ## 새 룸을 만드는 순서
 
-1. `Assets/Scenes/_Development/Dev_Gameplay`을 활성 씬으로 열고 Play Mode·Animation Mode와 `Tools > CASTLING > Live Camera & Parallax Preview`를 끈다. Hierarchy에서 `RoomTransitionController > Rooms Root`에 연결된 `Grid`의 직계 자식 `RoomArea`(예: `Room_02`) 또는 그 자식을 선택한 뒤 `Tools > CASTLING > 룸 > 선택한 룸 복제`를 누른다. 새 룸은 `Room_03`처럼 다음 번호를 받고, 기존 룸의 화면 요소와 겹치지 않는 오른쪽 공간에 놓인다.
+1. `Assets/Scenes/_Development/Dev_Gameplay`을 활성 씬으로 열고 Play Mode·Animation Mode와 `Tools > CASTLING > 카메라·패럴랙스 실시간 미리보기`를 끈다. Hierarchy에서 `RoomTransitionController > Rooms Root`에 연결된 `Grid`의 직계 자식 `RoomArea`(예: `Room_02`) 또는 그 자식을 선택한 뒤 `Tools > CASTLING > 룸 > 선택한 룸 복제`를 누른다. 새 룸은 `Room_03`처럼 다음 번호를 받고, 기존 룸의 화면 요소와 겹치지 않는 오른쪽 공간에 놓인다.
 2. `Ground` 타일맵에서 바닥과 천장을 함께 편집한다. `BackGround/BaseColor`와 `Structures_Near`, `Structures_Far`도 새 룸에 맞게 편집한다.
    `Structures_Near`와 `Structures_Far`는 1×1 조각으로 구조물을 조립한다. `BG_Structure_Modular_TilePalette` 왼쪽 `Near` / 오른쪽 `Far` 영역의 직선과 대칭 곡선 조각을 사용한다. 현재 배치의 색을 유지하려면 같은 Tile 색상 계열을 선택한다.
    곡선 전체를 찍으려면 팔레트에서 해당 모양의 영역 전체(빈 칸 포함)를 선택한다. 타일의 Transform Scale로 크기를 바꾸지 않는다. 조각의 배치·사용법은 [배경 구조물 조립 타일](BG_STRUCTURE_MODULAR.md)을 따른다.

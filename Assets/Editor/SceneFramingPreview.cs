@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 [InitializeOnLoad]
 internal static class SceneFramingPreview
 {
-    private const string MenuPath = "Tools/CASTLING/Live Camera & Parallax Preview";
+    private const string MenuPath = "Tools/CASTLING/카메라·패럴랙스 실시간 미리보기";
     private const string PreferenceKey = "CASTLING.LiveCameraParallaxPreview";
     private const string TransitionKey = PreferenceKey + ".WaitingForEditMode";
 

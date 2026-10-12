@@ -8,27 +8,36 @@ public sealed class PlatformOutlineImporter : ScriptedImporter
 {
     public static Texture2D PrepareTexture(Texture2D source)
     {
-        // Match the old PNG importer's alpha bleed so bilinear edges keep their color.
-        var settings = new TextureGenerationSettings(UnityEditor.TextureImporterType.Default);
-        var importer = settings.textureImporterSettings;
-        importer.alphaIsTransparency = true; importer.mipmapEnabled = false; importer.readable = true;
-        importer.npotScale = UnityEditor.TextureImporterNPOTScale.None;
-        settings.textureImporterSettings = importer;
-        settings.sourceTextureInformation = new SourceTextureInformation {
-            width = source.width, height = source.height, containsAlpha = true, hdr = false
-        };
-        var platform = settings.platformSettings;
-        platform.textureCompression = UnityEditor.TextureImporterCompression.Uncompressed;
-        platform.format = UnityEditor.TextureImporterFormat.RGBA32;
-        settings.platformSettings = platform; settings.enablePostProcessor = false;
-        using (var pixels = new Unity.Collections.NativeArray<Color32>(source.GetPixels32(), Unity.Collections.Allocator.Temp))
+        // Bilinear filtering needs color just beyond the visible alpha edge.
+        // Keep this in memory: TextureGenerator opens an import progress dialog,
+        // and its returned texture has not uploaded its pixels to the GPU yet.
+        var pixels = source.GetPixels32();
+        int width = source.width, height = source.height;
+        var filled = new bool[pixels.Length];
+        var frontier = new System.Collections.Generic.Queue<int>();
+        for (int i = 0; i < pixels.Length; i++)
+            if (pixels[i].a != 0) { filled[i] = true; frontier.Enqueue(i); }
+        for (int distance = 0; distance < 2; distance++)
         {
-            var result = TextureGenerator.GenerateTexture(settings, pixels);
-            Object.DestroyImmediate(source);
-            if (result.thumbNail != null) Object.DestroyImmediate(result.thumbNail);
-            result.texture.filterMode = FilterMode.Bilinear; result.texture.wrapMode = TextureWrapMode.Clamp;
-            return result.texture;
+            int count = frontier.Count;
+            for (int i = 0; i < count; i++)
+            {
+                int index = frontier.Dequeue(), x = index % width, y = index / width;
+                for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++)
+                {
+                    int nx = x + dx, ny = y + dy;
+                    if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+                    int next = ny * width + nx;
+                    if (filled[next]) continue;
+                    var color = pixels[index]; color.a = 0;
+                    pixels[next] = color; filled[next] = true; frontier.Enqueue(next);
+                }
+            }
         }
+        source.SetPixels32(pixels);
+        source.Apply(false, false);
+        source.filterMode = FilterMode.Bilinear; source.wrapMode = TextureWrapMode.Clamp;
+        return source;
     }
 
     public override void OnImportAsset(AssetImportContext context)

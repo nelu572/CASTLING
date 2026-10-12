@@ -42,11 +42,11 @@ public static class PlatformBorderRefresh
         Flush();
     }
 
-    [MenuItem("Tools/CASTLING/Check Selected Platform Borders")]
+    [MenuItem("Tools/CASTLING/선택한 자동 타일 접합 검사")]
     private static void CheckSelected()
     {
         var map = Selection.activeGameObject == null ? null : Selection.activeGameObject.GetComponent<Tilemap>();
-        if (map == null) { UnityEngine.Debug.Log("Select a gameplay Tilemap to check its borders."); return; }
+        if (map == null) { UnityEngine.Debug.Log("접합을 검사할 지형 타일맵을 선택하세요."); return; }
         int checkedCells = 0, partialCells = 0;
         foreach (var position in map.cellBounds.allPositionsWithin)
         {
@@ -57,8 +57,8 @@ public static class PlatformBorderRefresh
             tile.ResolveMask(map, position, out partial);
             if (partial == 0) continue;
             partialCells++;
-            UnityEngine.Debug.LogWarning($"Partial platform join at {map.name} {position}: keep the visible edge or select a manual border tile.", map);
+            UnityEngine.Debug.LogWarning($"부분 접합: {map.name} {position}. 노출된 선을 유지하거나 수동 외곽선 타일을 선택하세요.", map);
         }
-        UnityEngine.Debug.Log($"Platform borders: {checkedCells} automatic cells, {partialCells} partial joins.", map);
+        UnityEngine.Debug.Log($"타일 접합 검사: 자동 타일 {checkedCells}칸, 부분 접합 {partialCells}곳.", map);
     }
 }
