@@ -18,6 +18,7 @@ public static class PlatformOutlineAuthoring
     private const int ChunkPixels = 1024;
     private const int WithoutUndo = int.MinValue;
     private const string DirtySessionPrefix = "CASTLING.PlatformOutlineDirty.";
+    private const string ExportSessionPrefix = "CASTLING.PlatformOutlineExport.";
     private static readonly Dictionary<PlatformOutlineBake, int> Pending = new Dictionary<PlatformOutlineBake, int>();
     private static readonly HashSet<PlatformOutlineBake> DirtyBakes = new HashSet<PlatformOutlineBake>();
     private static readonly Dictionary<PlatformOutlineBake, HashSet<CellKey>> ChangedCells = new Dictionary<PlatformOutlineBake, HashSet<CellKey>>();
@@ -26,9 +27,29 @@ public static class PlatformOutlineAuthoring
         = new Dictionary<PlatformOutlineBake, Dictionary<Vector2Int, ChunkState>>();
     private static readonly Dictionary<Texture2D, SourcePixels> PixelSources = new Dictionary<Texture2D, SourcePixels>();
     private static readonly Dictionary<PlatformOutlineBake, BackgroundWork> Background = new Dictionary<PlatformOutlineBake, BackgroundWork>();
+    private static readonly Dictionary<int, PendingExport> PendingExports = new Dictionary<int, PendingExport>();
     private static Dictionary<Vector2Int, ChunkImage> completedImages;
     private static bool rebuilding;
     private static bool paletteWasOpen;
+    private static int resavingSceneHandle;
+
+    private sealed class PendingExport
+    {
+        public Scene scene;
+        public string path;
+        public List<SpriteRenderer> renderers;
+        public List<string> names;
+        public List<Sprite> previews;
+        public bool sceneSaved;
+        public int attempts;
+    }
+
+    [Serializable]
+    private sealed class ExportSnapshot
+    {
+        public string[] names;
+        public bool sceneSaved;
+    }
 
     private sealed class ChunkState
     {
@@ -98,9 +119,11 @@ public static class PlatformOutlineAuthoring
         Tilemap.tilemapTileChanged += Changed;
         Undo.undoRedoPerformed += RestoreAfterUndo;
         EditorSceneManager.sceneSaving += SaveScene;
+        EditorSceneManager.sceneSaved += SavedScene;
         EditorSceneManager.sceneClosing += ReleaseScenePreviews;
         EditorApplication.playModeStateChanged += PlayModeChanged;
         EditorApplication.delayCall += RestoreMissingPreviews;
+        EditorApplication.update += RestoreExportsOnIdle;
         AssemblyReloadEvents.beforeAssemblyReload += ClearPending;
         paletteWasOpen = UnityEditor.Tilemaps.GridPaintPaletteWindow.isActive;
         EditorApplication.update += WatchPalette;
@@ -354,6 +377,7 @@ public static class PlatformOutlineAuthoring
 
     private static void ReleaseScenePreviews(Scene scene, bool removingScene)
     {
+        ClearExport(scene);
         foreach (var bake in Bakes(scene))
         {
             ChunkStates.Remove(bake);
@@ -374,6 +398,7 @@ public static class PlatformOutlineAuthoring
     private static void RestoreMissingPreviews()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+        RestorePendingExports();
         for (int i = 0; i < SceneManager.sceneCount; i++)
             foreach (var bake in Bakes(SceneManager.GetSceneAt(i)))
                 if (NeedsApply(bake)) QueueUpdate(bake, WithoutUndo);
@@ -385,6 +410,7 @@ public static class PlatformOutlineAuthoring
     private static void PlayModeChanged(PlayModeStateChange state)
     {
         if (state != PlayModeStateChange.ExitingEditMode) return;
+        for (int i = 0; i < SceneManager.sceneCount; i++) ClearExport(SceneManager.GetSceneAt(i));
         for (int i = 0; i < SceneManager.sceneCount; i++)
         {
             var scene = SceneManager.GetSceneAt(i);
@@ -396,8 +422,21 @@ public static class PlatformOutlineAuthoring
 
     private static void SaveScene(Scene scene, string path)
     {
+        if (scene.handle == resavingSceneHandle) return;
         foreach (var bake in Bakes(scene)) Rebuild(bake, WithoutUndo, false, false);
         SaveSceneOutlines(scene, path, true);
+    }
+
+    private static void SavedScene(Scene scene)
+    {
+        RestorePendingExports();
+        PendingExport pending;
+        if (PendingExports.TryGetValue(scene.handle, out pending)
+            && pending.path == Path.ChangeExtension(scene.path, ".platformoutlines"))
+        {
+            pending.sceneSaved = true;
+            RememberExport(pending);
+        }
     }
 
     [MenuItem("Tools/CASTLING/플랫폼 외곽선/선택한 그리드 전체 재계산")]
@@ -1034,6 +1073,7 @@ public static class PlatformOutlineAuthoring
 
     private static void SaveSceneOutlines(Scene scene, string scenePath, bool prune)
     {
+        ClearExport(scene);
         var renderers = new List<SpriteRenderer>();
         foreach (var bake in Bakes(scene))
             if (bake.generatedRoot != null) renderers.AddRange(bake.generatedRoot.GetComponentsInChildren<SpriteRenderer>(true));
@@ -1067,15 +1107,176 @@ public static class PlatformOutlineAuthoring
         if (changed)
         {
             File.WriteAllBytes(path, bytes);
-            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
         }
-        var saved = AssetDatabase.LoadAssetAtPath<PlatformOutlineAsset>(path);
-        if (saved == null) throw new InvalidOperationException("Failed to import platform outlines: " + path);
-        var byName = new Dictionary<string, Sprite>();
-        foreach (var sprite in saved.sprites) byName.Add(sprite.name, sprite);
-        for (int i = 0; i < renderers.Count; i++) renderers[i].sprite = byName[names[i]];
-        ReleasePreviews(previews);
+        Sprite[] savedSprites;
+        if (!TryGetSavedSprites(path, names, out savedSprites))
+        {
+            // A previous save may have written these bytes while imports were
+            // suspended. Identical file contents do not prove the asset is current.
+            if (!changed)
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+            if (!TryGetSavedSprites(path, names, out savedSprites))
+            {
+                // Unity can defer imports during a save/asset-editing batch even
+                // with ForceSynchronousImport. Keep serializable previews intact
+                // until the whole imported set is ready; never bind a partial set.
+                PendingExports[scene.handle] = new PendingExport {
+                    scene = scene, path = path, renderers = renderers, names = names, previews = previews
+                };
+                RememberExport(PendingExports[scene.handle]);
+                QueueExportCompletion();
+                PlatformFillAuthoring.Finish();
+                return;
+            }
+        }
+        BindSavedSprites(renderers, savedSprites, previews);
         PlatformFillAuthoring.Finish();
+    }
+
+    private static bool TryGetSavedSprites(string path, List<string> names, out Sprite[] sprites)
+    {
+        sprites = new Sprite[names.Count];
+        var saved = AssetDatabase.LoadAssetAtPath<PlatformOutlineAsset>(path);
+        if (saved == null || saved.sprites == null) return false;
+        var byName = new Dictionary<string, Sprite>();
+        foreach (var sprite in saved.sprites) if (sprite != null) byName[sprite.name] = sprite;
+        for (int i = 0; i < names.Count; i++)
+            if (!byName.TryGetValue(names[i], out sprites[i])) return false;
+        return true;
+    }
+
+    private static void BindSavedSprites(List<SpriteRenderer> renderers, Sprite[] sprites, List<Sprite> previews)
+    {
+        for (int i = 0; i < renderers.Count; i++) renderers[i].sprite = sprites[i];
+        ReleasePreviews(previews);
+    }
+
+    private static void QueueExportCompletion()
+    {
+        EditorApplication.update -= CompletePendingExports;
+        EditorApplication.update += CompletePendingExports;
+    }
+
+    private static void RestoreExportsOnIdle()
+    {
+        if (EditorApplication.isUpdating || EditorApplication.isCompiling) return;
+        EditorApplication.update -= RestoreExportsOnIdle;
+        RestorePendingExports();
+    }
+
+    private static void RememberExport(PendingExport pending)
+    {
+        SessionState.SetString(ExportSessionPrefix + pending.path,
+            JsonUtility.ToJson(new ExportSnapshot { names = pending.names.ToArray(), sceneSaved = pending.sceneSaved }));
+    }
+
+    private static void ClearExport(Scene scene)
+    {
+        PendingExport pending;
+        if (PendingExports.TryGetValue(scene.handle, out pending))
+            SessionState.EraseString(ExportSessionPrefix + pending.path);
+        PendingExports.Remove(scene.handle);
+        if (!string.IsNullOrEmpty(scene.path))
+            SessionState.EraseString(ExportSessionPrefix + Path.ChangeExtension(scene.path, ".platformoutlines"));
+    }
+
+    private static void RestorePendingExports()
+    {
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            var scene = SceneManager.GetSceneAt(i);
+            if (string.IsNullOrEmpty(scene.path) || PendingExports.ContainsKey(scene.handle)) continue;
+            string path = Path.ChangeExtension(scene.path, ".platformoutlines");
+            string json = SessionState.GetString(ExportSessionPrefix + path, "");
+            if (string.IsNullOrEmpty(json)) continue;
+            var snapshot = JsonUtility.FromJson<ExportSnapshot>(json);
+            var renderers = new List<SpriteRenderer>();
+            foreach (var bake in Bakes(scene))
+                if (bake.generatedRoot != null) renderers.AddRange(bake.generatedRoot.GetComponentsInChildren<SpriteRenderer>(true));
+            bool valid = snapshot != null && snapshot.names != null && snapshot.names.Length == renderers.Count;
+            var previews = new List<Sprite>();
+            for (int j = 0; valid && j < renderers.Count; j++)
+            {
+                var sprite = renderers[j].sprite;
+                valid = sprite != null && sprite.name == snapshot.names[j];
+                previews.Add(sprite);
+            }
+            if (!valid) { SessionState.EraseString(ExportSessionPrefix + path); continue; }
+            PendingExports[scene.handle] = new PendingExport {
+                scene = scene, path = path, renderers = renderers, names = new List<string>(snapshot.names),
+                previews = previews, sceneSaved = snapshot.sceneSaved
+            };
+            QueueExportCompletion();
+        }
+    }
+
+    internal static void ImportedOutlines(string[] paths)
+    {
+        foreach (var pending in PendingExports.Values)
+            if (Array.IndexOf(paths, pending.path) >= 0) { QueueExportCompletion(); return; }
+    }
+
+    private static void CompletePendingExports()
+    {
+        if (PendingExports.Count == 0) { EditorApplication.update -= CompletePendingExports; return; }
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            for (int i = 0; i < SceneManager.sceneCount; i++) ClearExport(SceneManager.GetSceneAt(i));
+            EditorApplication.update -= CompletePendingExports;
+            return;
+        }
+        if (EditorApplication.isUpdating || EditorApplication.isCompiling) return;
+        bool retry = false;
+        foreach (var entry in new Dictionary<int, PendingExport>(PendingExports))
+        {
+            var pending = entry.Value;
+            var scene = pending.scene;
+            bool valid = scene.IsValid() && scene.isLoaded
+                && Path.ChangeExtension(scene.path, ".platformoutlines") == pending.path;
+            for (int i = 0; valid && i < pending.renderers.Count; i++)
+                valid = pending.renderers[i] != null && pending.renderers[i].gameObject.scene == scene
+                    && pending.renderers[i].sprite == pending.previews[i];
+            if (!valid) { ClearExport(scene); continue; }
+            Sprite[] sprites;
+            if (!TryGetSavedSprites(pending.path, pending.names, out sprites))
+            {
+                if (pending.attempts >= 3) continue;
+                pending.attempts++;
+                AssetDatabase.ImportAsset(pending.path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+                if (!TryGetSavedSprites(pending.path, pending.names, out sprites))
+                {
+                    if (pending.attempts < 3) retry = true;
+                    // Do not spin on an external batch, and do not abandon the
+                    // request. The postprocessor resumes it when import completes.
+                    continue;
+                }
+            }
+            // Only repeat the save when nothing was edited since that save.
+            // Otherwise connect the derived sprites and leave the user's work dirty.
+            bool resave = pending.sceneSaved && !scene.isDirty;
+            foreach (var bake in Bakes(scene)) if (NeedsApply(bake)) resave = false;
+            ClearExport(scene);
+            BindSavedSprites(pending.renderers, sprites, pending.previews);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!resave) continue;
+            try
+            {
+                resavingSceneHandle = scene.handle;
+                EditorSceneManager.SaveScene(scene);
+            }
+            finally { resavingSceneHandle = 0; }
+        }
+        EditorApplication.update -= CompletePendingExports;
+        if (retry) QueueExportCompletion();
+    }
+}
+
+internal sealed class PlatformOutlineExportPostprocessor : AssetPostprocessor
+{
+    private static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
+    {
+        PlatformOutlineAuthoring.ImportedOutlines(imported);
     }
 }
 
