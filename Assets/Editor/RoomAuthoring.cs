@@ -78,19 +78,28 @@ internal static class RoomAuthoring
     {
         room = null;
         roomsRoot = null;
+        var scene = EditorSceneManager.GetActiveScene();
         if (EditorApplication.isPlayingOrWillChangePlaymode ||
-            EditorSceneManager.GetActiveScene().name != SceneNames.Development.GameplaySandbox ||
+            !scene.IsValid() || !scene.isLoaded ||
             Selection.activeGameObject == null)
             return false;
 
         room = Selection.activeGameObject.GetComponentInParent<RoomArea>();
-        RoomTransitionController controller = UnityEngine.Object.FindAnyObjectByType<RoomTransitionController>();
-        if (room == null || controller == null || room.gameObject.scene != EditorSceneManager.GetActiveScene())
+        if (room == null || room.gameObject.scene != scene || room.transform.parent == null ||
+            room.Camera == null || room.CameraBounds == null || room.Background == null)
             return false;
 
-        roomsRoot = new SerializedObject(controller).FindProperty("roomsRoot").objectReferenceValue as Transform;
-        return roomsRoot != null && room.transform.parent == roomsRoot &&
-               room.Camera != null && room.CameraBounds != null && room.Background != null;
+        foreach (GameObject root in scene.GetRootGameObjects())
+            foreach (RoomTransitionController controller in root.GetComponentsInChildren<RoomTransitionController>())
+            {
+                if (!controller.gameObject.activeInHierarchy) continue;
+                Transform candidateRoot = new SerializedObject(controller).FindProperty("roomsRoot")
+                    .objectReferenceValue as Transform;
+                if (candidateRoot != room.transform.parent) continue;
+                roomsRoot = candidateRoot;
+                return true;
+            }
+        return false;
     }
 
     private static void ConnectRoomReferences(RoomArea source, RoomArea copy)

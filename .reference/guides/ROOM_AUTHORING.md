@@ -1,8 +1,8 @@
-# Dev_Gameplay 룸 만들기
+# 게임플레이 씬 룸 만들기
 
-현재 `Dev_Gameplay`은 한 씬의 `Grid` 아래에 여러 룸을 두는 구조다. 각 룸은 자기 지형, 배경, 카메라 경계, 입장 지점, 출구를 가진다.
+게임플레이 씬은 `RoomTransitionController > Rooms Root`에 연결된 `Grid` 아래에 룸을 두는 구조다. 각 룸은 자기 지형, 배경, 카메라 경계, 입장 지점, 출구를 가진다. 한 공간이 이어지는 챕터는 하나의 `RoomArea`로 유지한다.
 
-룸 복제 도구는 현재 `Dev_Gameplay` 전용이다. 카메라·패럴랙스 실시간 미리보기와 시작 위치 도구는 씬 이름과 관계없이 현재 편집 씬의 `RoomTransitionController`와 연결된 카메라·룸 구성을 기준으로 동작한다. 미리보기는 `Tools > CASTLING > 카메라·패럴랙스 실시간 미리보기`를 켜서 사용하며, 켜기/끄기 설정은 전역으로 공유한다.
+룸 복제, 카메라·패럴랙스 실시간 미리보기, 시작 위치 도구는 씬 이름과 관계없이 현재 편집 씬의 `RoomTransitionController`와 연결된 카메라·룸 구성을 기준으로 동작한다. 룸 복제는 선택한 룸의 부모를 `Rooms Root`로 참조하는 현재 씬의 활성 오브젝트에 붙은 컨트롤러를 찾으며, 다른 로드된 씬의 컨트롤러는 사용하지 않는다. 미리보기는 `Tools > CASTLING > 카메라·패럴랙스 실시간 미리보기`를 켜서 사용하며, 켜기/끄기 설정은 전역으로 공유한다.
 
 ```text
 Grid
@@ -22,7 +22,7 @@ Grid
 
 ## 새 룸을 만드는 순서
 
-1. `Assets/Scenes/_Development/Dev_Gameplay`을 활성 씬으로 열고 Play Mode·Animation Mode와 `Tools > CASTLING > 카메라·패럴랙스 실시간 미리보기`를 끈다. Hierarchy에서 `RoomTransitionController > Rooms Root`에 연결된 `Grid`의 직계 자식 `RoomArea`(예: `Room_02`) 또는 그 자식을 선택한 뒤 `Tools > CASTLING > 룸 > 선택한 룸 복제`를 누른다. 새 룸은 `Room_03`처럼 다음 번호를 받고, 기존 룸의 화면 요소와 겹치지 않는 오른쪽 공간에 놓인다.
+1. 편집할 게임플레이 씬을 활성 씬으로 열고 Play Mode·Animation Mode와 `Tools > CASTLING > 카메라·패럴랙스 실시간 미리보기`를 끈다. Hierarchy에서 현재 씬의 `RoomTransitionController > Rooms Root`에 연결된 `Grid`의 직계 자식 `RoomArea`(예: `Room_02`) 또는 그 자식을 선택한 뒤 `Tools > CASTLING > 룸 > 선택한 룸 복제`를 누른다. 새 룸은 `Room_03`처럼 다음 번호를 받고, 기존 룸의 화면 요소와 겹치지 않는 오른쪽 공간에 놓인다.
 2. `Ground` 타일맵에서 바닥과 천장을 함께 편집한다. `BackGround/BaseColor`와 `Structures_Near`, `Structures_Far`도 새 룸에 맞게 편집한다.
    `Structures_Near`와 `Structures_Far`는 1×1 조각으로 구조물을 조립한다. `BG_Structure_Modular_TilePalette` 왼쪽 `Near` / 오른쪽 `Far` 영역의 직선과 대칭 곡선 조각을 사용한다. 현재 배치의 색을 유지하려면 같은 Tile 색상 계열을 선택한다.
    곡선 전체를 찍으려면 팔레트에서 해당 모양의 영역 전체(빈 칸 포함)를 선택한다. 타일의 Transform Scale로 크기를 바꾸지 않는다. 조각의 배치·사용법은 [배경 구조물 조립 타일](BG_STRUCTURE_MODULAR.md)을 따른다.
@@ -31,7 +31,7 @@ Grid
 5. 출발 룸인 `Room_02/Exits` 아래에 `Exit_ToRoom03` 빈 오브젝트를 만든다. `RoomExit`을 추가하면 `BoxCollider2D`도 추가된다. 콜라이더의 `Is Trigger`를 켜고 출구 영역에 맞게 배치한다. `RoomExit > Destination`에 `Room_03/Entries/Entry_FromRoom02`를 지정한다. 복제된 룸에 원래 있던 출구는 목적지가 비워지므로 필요한 것만 다시 연결한다. 현재 전환 조건은 **킹과 룩의 중심이 동시에 이 콜라이더 안에 들어오는 것**이다.
 6. 씬을 저장하고 플레이한다. 두 캐릭터를 출구에 넣어 Room_03 입장 위치, 카메라 경계, 룸별 배경 전환, Console 오류 여부를 확인한다.
 
-복제 메뉴가 비활성이면 활성 씬, Play Mode 전환 여부, 선택한 `RoomArea`의 부모와 `Rooms Root`, `RoomTransitionController` 존재 여부, 원본 `RoomArea`의 카메라·경계·배경 참조를 확인한다. Animation Mode나 Live Preview가 켜져 있으면 메뉴 실행 시 복제가 중단된다. 복제할 카메라·경계·배경·Entry 마커와 지정된 패럴랙스 Origin·Visual 참조는 원본 룸 안에 있어야 한다.
+복제 메뉴가 비활성이면 선택한 룸이 현재 활성 씬에 있는지, Play Mode 전환 여부, 선택한 `RoomArea`의 부모를 `Rooms Root`로 참조하는 활성 컨트롤러가 같은 씬에 있는지, 원본 `RoomArea`의 카메라·경계·배경 참조를 확인한다. 같은 씬에 컨트롤러가 여러 개여도 선택한 룸의 부모와 일치하는 `Rooms Root`만 사용한다. Animation Mode나 Live Preview가 켜져 있으면 메뉴 실행 시 복제가 중단된다. 복제할 카메라·경계·배경·Entry 마커와 지정된 패럴랙스 Origin·Visual 참조는 원본 룸 안에 있어야 한다.
 
 ## 카메라가 보여주는 범위
 
