@@ -14,6 +14,8 @@ public sealed class RoomTransitionController : MonoBehaviour
 
     private RoomArea[] rooms;
     private CinemachineGroupFraming[] roomFramings;
+    private CinemachineConfiner2D[] roomConfiners;
+    private Bounds[] previousCameraBounds;
     private Vector2[] originalOrthoSizeRanges;
     private CinemachineTargetGroup targetGroup;
     private float[] originalTargetWeights;
@@ -39,6 +41,8 @@ public sealed class RoomTransitionController : MonoBehaviour
 
         rooms = roomsRoot.GetComponentsInChildren<RoomArea>(true);
         roomFramings = new CinemachineGroupFraming[rooms.Length];
+        roomConfiners = new CinemachineConfiner2D[rooms.Length];
+        previousCameraBounds = new Bounds[rooms.Length];
         originalOrthoSizeRanges = new Vector2[rooms.Length];
         targetGroup = GetComponent<CinemachineTargetGroup>();
         if (targetGroup == null)
@@ -76,6 +80,8 @@ public sealed class RoomTransitionController : MonoBehaviour
                 enabled = false;
                 return;
             }
+
+            roomConfiners[i] = confiner;
 
             roomFramings[i] = room.Camera.GetComponent<CinemachineGroupFraming>();
             if (roomFramings[i] == null)
@@ -242,7 +248,16 @@ public sealed class RoomTransitionController : MonoBehaviour
             }
 
             Bounds bounds = cameraBounds.bounds;
-            float maximumFittingSize = Mathf.Min(bounds.size.x / (2f * aspect), bounds.size.y * 0.5f);
+            if (bounds != previousCameraBounds[i])
+            {
+                roomConfiners[i].InvalidateBoundingShapeCache();
+                previousCameraBounds[i] = bounds;
+                rooms[i].Camera.PreviousStateIsValid = false;
+            }
+
+            // An exact fit collapses the Confiner2D polygon to the room's midpoint.
+            // Keep a small nonzero area so the camera can still follow along the room.
+            float maximumFittingSize = Mathf.Min(bounds.size.x / (2f * aspect), bounds.size.y * 0.5f) * 0.999f;
             if (maximumFittingSize <= 0f)
             {
                 continue;
@@ -255,6 +270,12 @@ public sealed class RoomTransitionController : MonoBehaviour
             if (framing.OrthoSizeRange != limited)
             {
                 framing.OrthoSizeRange = limited;
+            }
+
+            // Group framing damps toward its limit, so an old larger lens can exceed it.
+            if (rooms[i].Camera.State.Lens.OrthographicSize > maximumFittingSize)
+            {
+                rooms[i].Camera.PreviousStateIsValid = false;
             }
         }
     }

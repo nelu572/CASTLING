@@ -69,7 +69,7 @@ internal static class SceneFramingPreview
         if (!EditorPrefs.GetBool(PreferenceKey, true) ||
             waitingForEditMode ||
             EditorApplication.isPlayingOrWillChangePlaymode ||
-            !scene.IsValid() || scene.name != SceneNames.Development.GameplaySandbox)
+            !scene.IsValid() || !scene.isLoaded)
         {
             Stop();
             return;
@@ -99,7 +99,8 @@ internal static class SceneFramingPreview
         float targetX = targetGroup.transform.position.x;
         foreach (CinemachineCamera candidate in Object.FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None))
         {
-            if (!candidate.isActiveAndEnabled || candidate.Follow != targetGroup.transform) continue;
+            if (!candidate.isActiveAndEnabled || candidate.Follow != targetGroup.transform ||
+                candidate.gameObject.scene != targetGroup.gameObject.scene) continue;
             if (fallback == null || candidate.Priority.Value > fallback.Priority.Value) fallback = candidate;
 
             CinemachineConfiner2D candidateConfiner = candidate.GetComponent<CinemachineConfiner2D>();
@@ -113,9 +114,22 @@ internal static class SceneFramingPreview
 
     private static bool TryStart(Scene scene)
     {
-        camera = Camera.main;
+        camera = null;
+        foreach (Camera candidate in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None))
+        {
+            if (!candidate.isActiveAndEnabled || candidate.gameObject.scene != scene ||
+                !candidate.CompareTag(Tags.MainCamera) || candidate.GetComponent<CinemachineBrain>() == null) continue;
+            camera = candidate;
+            break;
+        }
         brain = camera != null ? camera.GetComponent<CinemachineBrain>() : null;
-        RoomTransitionController roomTransition = Object.FindFirstObjectByType<RoomTransitionController>();
+        RoomTransitionController roomTransition = null;
+        foreach (RoomTransitionController candidate in Object.FindObjectsByType<RoomTransitionController>(FindObjectsSortMode.None))
+        {
+            if (!candidate.isActiveAndEnabled || candidate.gameObject.scene != scene) continue;
+            roomTransition = candidate;
+            break;
+        }
         group = roomTransition != null ? roomTransition.GetComponent<CinemachineTargetGroup>() : null;
         virtualCamera = FindCameraForGroup(group);
         framing = virtualCamera != null ? virtualCamera.GetComponent<CinemachineGroupFraming>() : null;
@@ -125,7 +139,7 @@ internal static class SceneFramingPreview
         if (camera == null || brain == null || group == null || framing == null ||
             composer == null || confiner == null || confiner.BoundingShape2D == null ||
             !camera.orthographic || virtualCamera.Follow != group.transform ||
-            camera.gameObject.scene != scene)
+            confiner.BoundingShape2D.gameObject.scene != scene)
         {
             ClearReferences();
             return false;
@@ -141,11 +155,14 @@ internal static class SceneFramingPreview
         foreach (BackgroundParallax parallax in Object.FindObjectsByType<BackgroundParallax>(FindObjectsSortMode.None))
         {
             if (!parallax.isActiveAndEnabled || parallax.gameObject.scene != scene) continue;
-            Transform originReference = new SerializedObject(parallax)
-                .FindProperty("cameraOriginReference").objectReferenceValue as Transform;
+            SerializedObject properties = new SerializedObject(parallax);
+            if (properties.FindProperty("targetCamera").objectReferenceValue != camera) continue;
+            Transform originReference = properties.FindProperty("cameraOriginReference").objectReferenceValue as Transform;
+            Transform parallaxTransform = parallax.ParallaxTransform;
+            if (parallaxTransform == null || parallaxTransform.gameObject.scene != scene ||
+                (originReference != null && originReference.gameObject.scene != scene)) continue;
             if (originReference != null &&
                 !confiner.BoundingShape2D.bounds.Contains(originReference.position)) continue;
-            Transform parallaxTransform = parallax.ParallaxTransform;
             Layers.Add(new Layer
             {
                 Transform = parallaxTransform,
@@ -287,7 +304,8 @@ internal static class SceneFramingPreview
         float requiredSize = Mathf.Max(
             (maximumX - minimumX) / (2f * aspect * framingSize),
             (maximumY - minimumY) / (2f * framingSize));
-        float maximumFittingSize = Mathf.Min(bounds.size.x / (2f * aspect), bounds.size.y * 0.5f);
+        // Match the runtime limit without collapsing the Confiner2D's remaining area.
+        float maximumFittingSize = Mathf.Min(bounds.size.x / (2f * aspect), bounds.size.y * 0.5f) * 0.999f;
         float minimumSize = Mathf.Min(framing.OrthoSizeRange.x, maximumFittingSize);
         float maximumSize = Mathf.Min(framing.OrthoSizeRange.y, maximumFittingSize);
         size = Mathf.Clamp(requiredSize, minimumSize, maximumSize);
