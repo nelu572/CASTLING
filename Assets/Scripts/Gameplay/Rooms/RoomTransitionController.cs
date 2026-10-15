@@ -16,10 +16,10 @@ public sealed class RoomTransitionController : MonoBehaviour
     private CinemachineGroupFraming[] roomFramings;
     private CinemachineConfiner2D[] roomConfiners;
     private Bounds[] previousCameraBounds;
+    private uint[] previousCameraShapeHashes;
     private Vector2[] originalOrthoSizeRanges;
     private CinemachineTargetGroup targetGroup;
     private float[] originalTargetWeights;
-    private bool[] includedTargets;
     private Camera outputCamera;
     private RoomArea activeRoom;
     private bool transitioning;
@@ -43,6 +43,7 @@ public sealed class RoomTransitionController : MonoBehaviour
         roomFramings = new CinemachineGroupFraming[rooms.Length];
         roomConfiners = new CinemachineConfiner2D[rooms.Length];
         previousCameraBounds = new Bounds[rooms.Length];
+        previousCameraShapeHashes = new uint[rooms.Length];
         originalOrthoSizeRanges = new Vector2[rooms.Length];
         targetGroup = GetComponent<CinemachineTargetGroup>();
         if (targetGroup == null)
@@ -53,7 +54,6 @@ public sealed class RoomTransitionController : MonoBehaviour
         }
 
         originalTargetWeights = new float[targetGroup.Targets.Count];
-        includedTargets = new bool[targetGroup.Targets.Count];
         for (int i = 0; i < targetGroup.Targets.Count; i++)
         {
             originalTargetWeights[i] = targetGroup.Targets[i].Weight;
@@ -177,39 +177,13 @@ public sealed class RoomTransitionController : MonoBehaviour
             return;
         }
 
-        Bounds bounds = activeRoom.CameraBounds.bounds;
-        bool anyInside = false;
-        int nearestTarget = -1;
-        float nearestDistance = float.PositiveInfinity;
-        for (int i = 0; i < targetGroup.Targets.Count; i++)
-        {
-            CinemachineTargetGroup.Target target = targetGroup.Targets[i];
-            includedTargets[i] = false;
-            if (target.Object == null || originalTargetWeights[i] <= 0f) continue;
-
-            Vector3 point = target.Object.position;
-            bool inside = point.x >= bounds.min.x && point.x <= bounds.max.x &&
-                          point.y >= bounds.min.y && point.y <= bounds.max.y;
-            includedTargets[i] = inside;
-            anyInside |= inside;
-
-            float dx = point.x - Mathf.Clamp(point.x, bounds.min.x, bounds.max.x);
-            float dy = point.y - Mathf.Clamp(point.y, bounds.min.y, bounds.max.y);
-            float distance = dx * dx + dy * dy;
-            if (distance < nearestDistance)
-            {
-                nearestDistance = distance;
-                nearestTarget = i;
-            }
-        }
-
-        // Cinemachine needs a target even if both characters leave the camera area.
-        if (!anyInside && nearestTarget >= 0) includedTargets[nearestTarget] = true;
-
         bool changed = false;
         for (int i = 0; i < targetGroup.Targets.Count; i++)
         {
-            float weight = includedTargets[i] ? originalTargetWeights[i] : 0f;
+            CinemachineTargetGroup.Target target = targetGroup.Targets[i];
+            // Camera bounds limit the view; they do not decide which player participates in framing.
+            float weight = target.Object != null && target.Object.gameObject.activeInHierarchy
+                ? originalTargetWeights[i] : 0f;
             if (targetGroup.Targets[i].Weight == weight) continue;
             targetGroup.Targets[i].Weight = weight;
             changed = true;
@@ -241,23 +215,26 @@ public sealed class RoomTransitionController : MonoBehaviour
         for (int i = 0; i < rooms.Length; i++)
         {
             CinemachineGroupFraming framing = roomFramings[i];
-            Collider2D cameraBounds = rooms[i].CameraBounds;
+            BoxCollider2D cameraBounds = rooms[i].CameraBounds;
             if (framing == null || cameraBounds == null || !cameraBounds.enabled)
             {
                 continue;
             }
 
             Bounds bounds = cameraBounds.bounds;
-            if (bounds != previousCameraBounds[i])
+            uint shapeHash = cameraBounds.GetShapeHash();
+            if (bounds != previousCameraBounds[i] || shapeHash != previousCameraShapeHashes[i])
             {
                 roomConfiners[i].InvalidateBoundingShapeCache();
                 previousCameraBounds[i] = bounds;
+                previousCameraShapeHashes[i] = shapeHash;
                 rooms[i].Camera.PreviousStateIsValid = false;
             }
 
-            // An exact fit collapses the Confiner2D polygon to the room's midpoint.
+            // An exact fit collapses the Confiner2D boundary to the room's midpoint.
             // Keep a small nonzero area so the camera can still follow along the room.
-            float maximumFittingSize = Mathf.Min(bounds.size.x / (2f * aspect), bounds.size.y * 0.5f) * 0.999f;
+            float maximumFittingSize = Mathf.Min(bounds.size.x / (2f * aspect), bounds.size.y * 0.5f);
+            maximumFittingSize *= 0.999f;
             if (maximumFittingSize <= 0f)
             {
                 continue;

@@ -26,7 +26,7 @@ Grid
 2. `Ground` 타일맵에서 바닥과 천장을 함께 편집한다. `BackGround/BaseColor`와 `Structures_Near`, `Structures_Far`도 새 룸에 맞게 편집한다.
    `Structures_Near`와 `Structures_Far`는 1×1 조각으로 구조물을 조립한다. `BG_Structure_Modular_TilePalette` 왼쪽 `Near` / 오른쪽 `Far` 영역의 직선과 대칭 곡선 조각을 사용한다. 현재 배치의 색을 유지하려면 같은 Tile 색상 계열을 선택한다.
    곡선 전체를 찍으려면 팔레트에서 해당 모양의 영역 전체(빈 칸 포함)를 선택한다. 타일의 Transform Scale로 크기를 바꾸지 않는다. 조각의 배치·사용법은 [배경 구조물 조립 타일](BG_STRUCTURE_MODULAR.md)을 따른다.
-3. `Camera/CameraRoomBounds`의 `BoxCollider2D` 범위를 새 룸에 맞춘다. 복제 도구가 `RoomArea`와 카메라 `CinemachineConfiner2D`를 **같은 새 콜라이더**에 연결하므로 이 박스의 크기와 위치만 조절하면 된다. 지형 크기에서 카메라 범위를 자동 계산하지는 않는다.
+3. `Camera/CameraRoomBounds`의 `BoxCollider2D > Size / Offset`으로 사각형 카메라 범위를 새 룸에 맞춘다. 복제 도구가 `RoomArea`와 카메라 `CinemachineConfiner2D`를 **같은 새 BoxCollider2D**에 연결한다. 지형 크기에서 카메라 범위를 자동 계산하지는 않는다.
 4. `Entries/Entry_FromRoom01`을 `Entry_FromRoom02`처럼 실제 진입 경로에 맞게 이름을 바꾼다. 그 아래 `KingStart`, `RookStart`를 플레이어가 도착할 자리로 옮긴다. `Tools > CASTLING > 시작 위치 > 시작 좌표 보기`에서 대상 컨트롤러와 Entry를 선택해 좌표를 수정하거나 씬 뷰로 이동할 수 있다. **미리보기 표시**를 켜면 Scene View에 킹·룩 윤곽과 드래그 기능이 나타난다.
 5. 출발 룸인 `Room_02/Exits` 아래에 `Exit_ToRoom03` 빈 오브젝트를 만든다. `RoomExit`을 추가하면 `BoxCollider2D`도 추가된다. 콜라이더의 `Is Trigger`를 켜고 출구 영역에 맞게 배치한다. `RoomExit > Destination`에 `Room_03/Entries/Entry_FromRoom02`를 지정한다. 복제된 룸에 원래 있던 출구는 목적지가 비워지므로 필요한 것만 다시 연결한다. 현재 전환 조건은 **킹과 룩의 중심이 동시에 이 콜라이더 안에 들어오는 것**이다.
 6. 씬을 저장하고 플레이한다. 두 캐릭터를 출구에 넣어 Room_03 입장 위치, 카메라 경계, 룸별 배경 전환, Console 오류 여부를 확인한다.
@@ -35,9 +35,17 @@ Grid
 
 ## 카메라가 보여주는 범위
 
-카메라 경계는 화면 전체가 들어가야 하는 사각형 영역이다. `CameraRoomBounds`의 `BoxCollider2D > Size / Offset`으로 범위를 편집한다.
+카메라 경계는 `BoxCollider2D` 사각형만 사용한다. `CameraRoomBounds`의 `BoxCollider2D > Size / Offset`으로 화면 전체가 들어갈 범위를 편집한다. `RoomArea > Camera Bounds`도 BoxCollider2D만 받는다. 경계와 카메라는 월드 축에 평행하게 유지하고 Box의 Edge Radius는 0으로 둔다.
 
-영역이 기존 줌 크기보다 작으면 화면이 들어가도록 자동으로 확대하며, Inspector의 최소 줌 크기보다 작아질 수 있다. 경계에 정확히 맞는 화면에서 카메라가 중앙으로 튀지 않도록 0.1% 여유를 둔다. Play 중 영역의 크기나 위치가 바뀌면 Cinemachine 경계 캐시와 보간 상태를 갱신한다. 화면비 변경 등으로 기존 화면이 새 줌 상한보다 커진 경우에도 즉시 상한을 적용한다. 편집 미리보기는 같은 줌 한계와 사각형 경계를 적용한다.
+줌 한계는 사각형 경계의 너비·높이와 화면비로 계산한다. 이 한계가 기존 줌보다 작으면 자동으로 확대하며, Inspector의 최소 줌보다 작아질 수 있다. Inspector의 원래 줌 범위는 보존하고 Play 중에만 이 한도를 적용한다. 경계에 정확히 맞는 화면에서 카메라가 중앙으로 튀지 않도록 0.1% 여유를 둔다.
+
+룸 카메라의 `CinemachineConfiner2D`에는 같은 BoxCollider2D를 연결한다. 카메라 확장 컴포넌트는 `CinemachineGroupFraming` 다음에 `CinemachineConfiner2D`가 실행되는 순서를 유지한다. 거리별 줌 중에도 경계를 지키려면 Confiner의 `Slowing Distance`는 0으로 두고, 추적·줌의 부드러움은 Composer·GroupFraming의 damping으로 조절한다. 경계 감속은 이전 카메라 위치를 섞기 때문에 줌이 커지는 동안 새 경계를 잠깐 넘을 수 있다.
+
+Play 중 경계의 크기·위치가 바뀌면 Cinemachine 경계 캐시와 보간 상태를 갱신한다. 화면비 변경 등으로 기존 화면이 새 줌 상한보다 커진 경우에도 즉시 상한을 적용한다. 편집 미리보기는 같은 줌 한계와 사각형 경계 제한을 사용한다.
+
+공유 화면은 위치와 관계없이 활성 플레이어의 기존 양수 weight를 유지한다. 카메라 경계 밖이라는 이유로 한 플레이어를 프레이밍에서 제외하지 않는다. 가까우면 최소 줌, 멀어지면 필요한 줌으로 변하며 재합류하면 다시 좁아진다. `CinemachineGroupFraming`의 줌 범위와 damping으로 조절한다.
+
+경계는 카메라가 보여줘도 되는 공간으로 잡는다. 줌 상한 계산은 경계 어딘가에 화면이 들어가는지를 구하므로 두 몸체가 함께 들어가는 구도까지 보장하지 않는다. 퍼즐의 대기·도착·교환 위치를 실제 화면에서 확인하고, 필요한 화면이 들어갈 여유와 주변 배경의 범위를 함께 확보한다. 확대 전후의 몸체 가시성뿐 아니라 복귀 후 위치·줌 수렴도 확인한다.
 
 ## 여러 갈래와 시작 룸
 

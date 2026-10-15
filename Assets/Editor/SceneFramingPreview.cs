@@ -96,17 +96,14 @@ internal static class SceneFramingPreview
         if (targetGroup == null) return null;
 
         CinemachineCamera fallback = null;
-        float targetX = targetGroup.transform.position.x;
         foreach (CinemachineCamera candidate in Object.FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None))
         {
             if (!candidate.isActiveAndEnabled || candidate.Follow != targetGroup.transform ||
                 candidate.gameObject.scene != targetGroup.gameObject.scene) continue;
-            if (fallback == null || candidate.Priority.Value > fallback.Priority.Value) fallback = candidate;
-
             CinemachineConfiner2D candidateConfiner = candidate.GetComponent<CinemachineConfiner2D>();
-            if (candidateConfiner == null || candidateConfiner.BoundingShape2D == null) continue;
-            Bounds bounds = candidateConfiner.BoundingShape2D.bounds;
-            if (targetX >= bounds.min.x && targetX <= bounds.max.x) return candidate;
+            if (candidateConfiner == null || !(candidateConfiner.BoundingShape2D is BoxCollider2D)) continue;
+            if (fallback == null || candidate.Priority.Value > fallback.Priority.Value) fallback = candidate;
+            if (candidateConfiner.BoundingShape2D.OverlapPoint(targetGroup.transform.position)) return candidate;
         }
 
         return fallback;
@@ -137,7 +134,7 @@ internal static class SceneFramingPreview
         confiner = virtualCamera != null ? virtualCamera.GetComponent<CinemachineConfiner2D>() : null;
 
         if (camera == null || brain == null || group == null || framing == null ||
-            composer == null || confiner == null || confiner.BoundingShape2D == null ||
+            composer == null || confiner == null || !(confiner.BoundingShape2D is BoxCollider2D) ||
             !camera.orthographic || virtualCamera.Follow != group.transform ||
             confiner.BoundingShape2D.gameObject.scene != scene)
         {
@@ -244,7 +241,7 @@ internal static class SceneFramingPreview
         position = default;
         size = 0f;
         if (camera == null || group == null || framing == null || confiner == null ||
-            confiner.BoundingShape2D == null) return false;
+            !(confiner.BoundingShape2D is BoxCollider2D)) return false;
 
         Bounds bounds = confiner.BoundingShape2D.bounds;
         float minimumX = float.PositiveInfinity;
@@ -253,40 +250,13 @@ internal static class SceneFramingPreview
         float maximumY = float.NegativeInfinity;
         Vector2 weightedCenter = Vector2.zero;
         float totalWeight = 0f;
-        bool hasInsideTarget = false;
-        int nearestTarget = -1;
-        float nearestDistance = float.PositiveInfinity;
 
         for (int i = 0; i < group.Targets.Count; i++)
         {
             CinemachineTargetGroup.Target target = group.Targets[i];
-            if (target.Object == null || target.Weight <= 0f) continue;
+            if (target.Object == null || !target.Object.gameObject.activeInHierarchy || target.Weight <= 0f) continue;
 
             Vector3 point = target.Object.position;
-            if (point.x >= bounds.min.x && point.x <= bounds.max.x &&
-                point.y >= bounds.min.y && point.y <= bounds.max.y)
-                hasInsideTarget = true;
-
-            float dx = point.x - Mathf.Clamp(point.x, bounds.min.x, bounds.max.x);
-            float dy = point.y - Mathf.Clamp(point.y, bounds.min.y, bounds.max.y);
-            float distance = dx * dx + dy * dy;
-            if (distance < nearestDistance)
-            {
-                nearestDistance = distance;
-                nearestTarget = i;
-            }
-        }
-
-        for (int i = 0; i < group.Targets.Count; i++)
-        {
-            CinemachineTargetGroup.Target target = group.Targets[i];
-            if (target.Object == null || target.Weight <= 0f) continue;
-
-            Vector3 point = target.Object.position;
-            bool inside = point.x >= bounds.min.x && point.x <= bounds.max.x &&
-                          point.y >= bounds.min.y && point.y <= bounds.max.y;
-            if (hasInsideTarget ? !inside : i != nearestTarget) continue;
-
             float radius = Mathf.Max(0f, target.Radius);
             minimumX = Mathf.Min(minimumX, point.x - radius);
             maximumX = Mathf.Max(maximumX, point.x + radius);
@@ -305,7 +275,9 @@ internal static class SceneFramingPreview
             (maximumX - minimumX) / (2f * aspect * framingSize),
             (maximumY - minimumY) / (2f * framingSize));
         // Match the runtime limit without collapsing the Confiner2D's remaining area.
-        float maximumFittingSize = Mathf.Min(bounds.size.x / (2f * aspect), bounds.size.y * 0.5f) * 0.999f;
+        float maximumFittingSize = Mathf.Min(bounds.size.x / (2f * aspect), bounds.size.y * 0.5f);
+        maximumFittingSize *= 0.999f;
+        if (maximumFittingSize <= 0f) return false;
         float minimumSize = Mathf.Min(framing.OrthoSizeRange.x, maximumFittingSize);
         float maximumSize = Mathf.Min(framing.OrthoSizeRange.y, maximumFittingSize);
         size = Mathf.Clamp(requiredSize, minimumSize, maximumSize);

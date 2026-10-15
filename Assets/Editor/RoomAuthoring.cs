@@ -107,7 +107,7 @@ internal static class RoomAuthoring
         Transform sourceRoot = source.transform;
         Transform copyRoot = copy.transform;
         CinemachineCamera roomCamera = MapComponent(source.Camera, sourceRoot, copyRoot);
-        Collider2D cameraBounds = MapComponent(source.CameraBounds, sourceRoot, copyRoot);
+        BoxCollider2D cameraBounds = MapComponent(source.CameraBounds, sourceRoot, copyRoot);
         GameObject background = MapTransform(source.Background.transform, sourceRoot, copyRoot).gameObject;
 
         var roomProperties = new SerializedObject(copy);
