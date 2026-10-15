@@ -40,6 +40,8 @@
 
 ### 재시작과 자동 입력
 
+- 킹·룩의 실제 입력 걷기·점프 관측과 데이터 시퀀스 반복은 [플레이테스트 자동화](PLAYTEST_AUTOMATION.md)의 Editor 전용 API를 사용할 수 있다. 실행 조건·실패·샘플링 한계·정리 결과를 함께 읽으며 전체 퍼즐 검증을 대신하지 않는다.
+
 - 암전·타임아웃 대기는 게임 시간 정지를 고려해 unscaled time 또는 Editor 시간으로 측정한다. `RespawnCount`는 검사 시작값에 대한 증가량으로 중복 여부를 확인한다.
 - 복귀 위치는 현재 `RespawnEntry.KingPoint`와 `RookPoint`에 비교한다. 입력·이동 활성 상태와 `Time.timeScale`이 검사 전 상태로 돌아왔는지 확인하며 고정값으로 덮어쓰지 않는다.
 - 암전 도중 `VoidRespawnZone` 컴포넌트 또는 오브젝트를 비활성화해 재시작을 중단하는 사례도 확인한다. `inputIsActive`·`PlayerMovement.enabled`·`Time.timeScale`이 재시작 전 상태로 돌아오고, 연결된 Fade의 `alpha`가 0, `IsRespawning`이 false인지 확인한다. 정상 재시작 완료와 중단 복원을 구분해 보고한다.
