@@ -7,12 +7,13 @@
 - 현재 기획에서 확정되지 않은 CASTLING 발동 조건, 물리 수치, 조작 방식, 퍼즐 규칙은 임의로 정하지 않는다. 구현에 필요한 선택지가 남아 있으면 사용자에게 확인한다.
 - 요청과 기획에 없는 기능, 콘텐츠, 리팩터링은 추가하지 않는다.
 - `.codex/harness`에는 지속적인 작업 규칙, `.reference/guides`에는 룸·에셋 사용 안내, `.reference/notion`에는 기획 원문 안내, `.reference/records`에는 보존할 제작 결정을 둔다. 반복해서 필요한 발견은 해당 지침에 반영하고 일회성 산출물을 문서 폴더에 쌓지 않는다.
-- `.codex/skills`에는 커밋·PR·이슈·검증·Notion 안내 갱신 절차를 파일 단위로 둔다. 아래 요청별 링크로 읽으며, 일회성 검사 코드나 작업 결과는 넣지 않는다.
+- `.codex/skills`에는 레벨 디자인·커밋·PR·이슈·검증·Notion 안내 갱신 절차를 파일 단위로 둔다. 아래 요청별 링크로 읽으며, 일회성 검사 코드나 작업 결과는 넣지 않는다.
 - 프로젝트 문서용 양식은 `.templates/<종류>_TEMPLATE/template.md`에 두고, 사용법·관리 기준은 `.codex`에서 관리한다. 보존할 편집 원본·재사용 검사·제작 기록을 추가하거나 임시 작업 폴더를 만들 때는 [자료 추가 기준과 양식](.codex/harness/TEMPLATES.md)을 따른다. 새 자료의 용도·사용 방법·검증 상태·보존 및 정리 기준을 작성하고 관련 지침에서 연결한다.
 - `.reference/records/CHAPTER_01.md`에는 보존할 사용자 결정과 미확정 범위만 남긴다. 현재 씬 상태·수치는 Unity Editor와 코드에서 확인하며, 기록의 값으로 사용자 튜닝을 되돌리지 않는다.
 - Chapter_01의 조작·퍼즐·배경·카메라 작업 전에는 [제작 결정 기록](.reference/records/CHAPTER_01.md)을 관련 Notion 기획과 함께 읽는다.
 - 스크린샷·일회성 검사 코드·JSON·로그·시안은 [.work 안내](.work/README.md)에 따라 작업별 폴더에 모은다. 작업 시작·재개, 검사·구현 단락 종료, 검토 완료, 커밋·PR·완료 보고 전에 해당 작업 자료의 필요성과 보존 종료 조건을 확인하고, 필요 없어진 자료를 별도 정리 요청 없이 정리한다. 검토 대기·미해결·보존 자료를 남기면 작업별 안내를 갱신하고 경로·이유·정리 조건을 보고한다. `.work/README.md`와 루트는 유지한다. 화면 확인 방법은 [.codex/harness/UNITY.md](.codex/harness/UNITY.md)를 따른다.
 - Unity 씬·프리팹·에셋 작업은 [.codex/harness/UNITY.md](.codex/harness/UNITY.md)를 먼저 읽는다.
+- 레벨의 레퍼런스 분석·기획·공간 설계·배치·검증·개선은 [레벨 디자인 절차](.codex/skills/LEVEL_DESIGN.md)에서 요청 범위에 맞는 단계만 수행한다. 기본은 설계안을 제시해 승인받은 뒤 Unity에 반영하며, 이미 승인된 설계의 적용 요청은 재승인받지 않는다.
 - 코드·씬·에셋 변경 후 검증을 요청받거나 커밋 전에 검증할 때는 [.codex/skills/UNITY_VERIFY.md](.codex/skills/UNITY_VERIFY.md)를 따른다.
 - 사용자가 커밋을 명시적으로 요청하면 stage·commit 전에 [.codex/skills/AUTO_COMMIT.md](.codex/skills/AUTO_COMMIT.md)를 따른다.
 - GitHub PR, 라벨, 이슈 관련 작업은 [.codex/harness/GITHUB.md](.codex/harness/GITHUB.md)를 먼저 읽는다. 사용자가 PR 또는 이슈 생성을 명시적으로 요청하면 각각 [.codex/skills/AUTO_PR.md](.codex/skills/AUTO_PR.md), [.codex/skills/AUTO_ISSUE.md](.codex/skills/AUTO_ISSUE.md)를 추가로 따른다.

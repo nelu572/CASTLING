@@ -13,7 +13,9 @@
 
 ```text
 .github/          # GitHub PR·이슈 양식
-.templates/       # 자료·검사·제작 기록을 추가하는 양식
+.templates/       # 레벨 설계·자료·검사·제작 기록을 추가하는 양식
+├─ LEVEL_DESIGN_TEMPLATE/
+│  └─ template.md
 ├─ RESOURCE_TEMPLATE/
 │  └─ template.md
 ├─ VERIFICATION_TEMPLATE/
@@ -23,9 +25,9 @@
 .work/            # 작업별 임시 자료와 정리 안내
 .codex/           # Codex 하네스와 작업 절차
 ├─ harness/       # 지속적인 작업 규칙
-└─ skills/        # 커밋·PR·이슈·검증·Notion 안내 갱신 절차 파일
+└─ skills/        # 레벨 디자인·커밋·PR·이슈·검증·Notion 안내 갱신 절차 파일
 .reference/       # 프로젝트 사용 안내·기획·기록
-├─ guides/        # 룸·배경·플랫폼 에셋 사용 안내
+├─ guides/        # 레벨 설계 근거·룸·배경·플랫폼 에셋 사용 안내
 ├─ notion/        # Notion 기획 원문 안내
 └─ records/       # 보존할 제작 결정과 미확정 범위
 ```
@@ -43,3 +45,7 @@
 작업 규칙은 [AGENTS.md](AGENTS.md)와 [Unity 하네스](.codex/harness/UNITY.md), 검증 절차는 [Unity 변경 검증](.codex/skills/UNITY_VERIFY.md)을 따른다. 룸·타일 작업에는 [룸 만들기](.reference/guides/ROOM_AUTHORING.md), [배경 구조물 조립](.reference/guides/BG_STRUCTURE_MODULAR.md), [플랫폼 타일 사용법](.reference/guides/PLATFORM_SHEETS.md)을 참고한다.
 
 [Chapter_01 기록](.reference/records/CHAPTER_01.md)은 당시 사용자 결정과 미확정 범위를 모은 문서다. 현재 씬 설정이나 확정 기획을 대신하지 않는다.
+
+레벨 작업은 [레벨 디자인 절차](.codex/skills/LEVEL_DESIGN.md)에 따라 **요청·게임 분석 → 목표 경험/설계 전략 선택 → 공간 설계·승인 → 구현 → 기술·게임플레이·공간 평가 → 개선** 순서로 진행하며, 요청한 단계까지만 수행한다. [프로젝트 근거](.reference/guides/LEVEL_DESIGN_CONTEXT.md), [작품별 레퍼런스 분석 자료](.reference/guides/LEVEL_DESIGN_REFERENCES.md), [설계 양식](.templates/LEVEL_DESIGN_TEMPLATE/template.md)을 구분해 사용한다. 특정 레퍼런스·지형형·기믹을 공통 기본값으로 삼지 않으며 부족한 조건은 프로젝트에서 파악한다. 요청 예시는 절차 문서에 있다. 자동 배치·도달성 검사 프로그램은 포함하지 않는다.
+
+이번 검토 브랜치의 [하네스 검토 범위·검증 보고서](.work/20261015-level-design-harness-review/REPORT.md)는 문서 구조, 세 가상 요청의 모의 점검과 한계를 설명한다. 검토용 보고서만 선별해 포함했으며 테스트용 Unity 씬·에셋은 포함하지 않는다.

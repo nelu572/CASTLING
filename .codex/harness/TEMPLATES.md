@@ -10,6 +10,7 @@
 | GitHub 이슈 | `.github/ISSUE_TEMPLATE/` | [작업 이슈 양식](../../.github/ISSUE_TEMPLATE/task.md) |
 | 룸·에셋 사용법과 반복 검사 방법 | `.reference/guides/` | 검사 방법은 [검사 안내 양식](../../.templates/VERIFICATION_TEMPLATE/template.md) |
 | 보존할 사용자 결정과 미확정 범위 | `.reference/records/` | [제작 결정 양식](../../.templates/RECORD_TEMPLATE/template.md) |
+| 레벨 분석·레퍼런스 비교·설계안·검증 계획 | 초안은 `.work/<날짜>-<작업명>/`, 보존할 승인 결정은 `.reference/records/` | [레벨 디자인 양식](../../.templates/LEVEL_DESIGN_TEMPLATE/template.md) |
 | 게임 에셋의 편집 원본과 생성 도구 | `Tools/Art/` | [자료 양식](../../.templates/RESOURCE_TEMPLATE/template.md)을 바탕으로 해당 폴더의 README에 등록 |
 | 반복 실행할 검사 코드 | 실제 실행 방식에 맞는 코드 위치 | [자료 양식](../../.templates/RESOURCE_TEMPLATE/template.md)에 실행 방법·의존성·부작용을 쓰고 [검사 안내 양식](../../.templates/VERIFICATION_TEMPLATE/template.md)에 검사 범위를 명시 |
 | 스크린샷·일회성 코드·JSON·로그·시안 | `.work/<날짜>-<작업명>/` | [.work 안내](../../.work/README.md)의 작업별 양식 |
@@ -34,6 +35,8 @@
 양식의 설명과 자리표시자는 실제 내용으로 바꾸고, 적용되지 않는 항목은 생략한다. 기존 문서를 일괄 재작성하거나 자료를 자동 복원하는 기준으로 사용하지 않는다.
 
 ## 임시 작업 폴더
+
+레벨 작업은 [레벨 디자인 절차](../skills/LEVEL_DESIGN.md)에 따라 양식의 필요한 단계만 채운다. 게임별 레퍼런스는 양식의 같은 프로필 표를 반복해 비교하며, 처음부터 별도 프로필 폴더를 만들지 않는다. 초안·측정 결과·플레이테스트 기록은 작업 폴더에서 관리하고, 승인된 장기 결정만 기존 챕터 기록에 합치거나 제작 결정 양식으로 보존한다. 승인된 설계의 적용 범위·버전·사용자 승인 근거를 함께 남기고, 현재 씬 수치를 영구 기준으로 승격하지 않는다. 반복 사용할 레퍼런스 관찰을 사용 안내에 보존할 때는 출처·관찰 범위·갱신 조건을 붙인다.
 
 `.work` 루트와 README는 유지한다. 작업별 폴더는 자료가 필요할 때 만들고, 저장 경로·상태별 보관·정리 시점·사용 중인 파일 처리는 [.work 안내](../../.work/README.md)를 따른다. `.work/README.md`만 Git에 보존하며, 작업별 하위 폴더는 전체를 제외한다.
 
