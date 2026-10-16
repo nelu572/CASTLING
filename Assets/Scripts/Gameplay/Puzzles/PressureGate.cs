@@ -13,17 +13,18 @@ public sealed class PressureGate : MonoBehaviour
     [SerializeField] private Color openColor = Color.white;
 
     private readonly Collider2D[] overlaps = new Collider2D[8];
-    private ContactFilter2D playerFilter;
+    private ContactFilter2D occupantFilter;
     private Vector3 closedShutterPosition;
 
     public bool IsOpen { get; private set; }
 
     private void Awake()
     {
-        playerFilter.SetLayerMask(LayerMask.GetMask(Layers.Player));
-        playerFilter.useTriggers = false;
+        occupantFilter.SetLayerMask(LayerMask.GetMask(Layers.Player, Layers.Environment));
+        occupantFilter.useTriggers = false;
         if (switches == null || switches.Length == 0 || blockingCollider == null ||
-            blockingCollider.isTrigger || shutter == null || indicator == null || playerFilter.layerMask == 0)
+            blockingCollider.isTrigger || shutter == null || indicator == null ||
+            LayerMask.GetMask(Layers.Player) == 0 || LayerMask.GetMask(Layers.Environment) == 0)
         {
             Debug.LogError("Pressure gate switch, collision, or visual references are incomplete.", this);
             enabled = false;
@@ -63,7 +64,18 @@ public sealed class PressureGate : MonoBehaviour
         Vector2 size = new(blockingCollider.size.x * Mathf.Abs(scale.x),
                            blockingCollider.size.y * Mathf.Abs(scale.y));
         Vector2 center = shape.TransformPoint(blockingCollider.offset);
-        return Physics2D.OverlapBox(center, size, shape.eulerAngles.z, playerFilter, overlaps) > 0;
+        int count = Physics2D.OverlapBox(center, size, shape.eulerAngles.z, occupantFilter, overlaps);
+        for (int i = 0; i < count; i++)
+        {
+            Collider2D occupant = overlaps[i];
+            if (occupant.gameObject.layer == LayerMask.NameToLayer(Layers.Player)) return true;
+
+            Rigidbody2D body = occupant.attachedRigidbody;
+            if (body != null && body.TryGetComponent(out PushablePlatform platform) &&
+                platform.isActiveAndEnabled) return true;
+        }
+
+        return false;
     }
 
     private void SetOpen(bool open)

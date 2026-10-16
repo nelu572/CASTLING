@@ -9,6 +9,7 @@
 - [Notion 기획서](https://app.notion.com/p/3dcb3e6e776c81f08abde9fa6cefdb80): 킹·룩의 2인 협동, 함께 이동/분리/재합류, 준비한 위치와 진행을 CASTLING으로 넘기는 경험. 양쪽 모두 직접 움직이고 판단해야 한다. 4방향 룩 이동과 능력 제약의 일부는 프로토타입 후보·미확정이므로 구현된 기능으로 가정하지 않는다.
 - [Notion 아트 레퍼런스](https://app.notion.com/p/3dcb3e6e776c81f2bb63c68f908c5ec5): 평면 2D·미니멀·흑백 플랫폼·체스 실루엣, 낮은 대비의 후경. 이미지 속 이동 장치·버튼·노란 상자 등은 기능 확정안이 아니다. 레벨 레퍼런스를 바꿔도 아트 방향을 자동 변경하지 않는다.
 - [Chapter_01 기록](../records/CHAPTER_01.md): 해당 챕터에서 승인된 조작·퍼즐·카메라 방향과 뒤에 갱신된 결정. 과거 첫 통로 구성을 후속 튜토리얼 변경보다 우선하지 않는다. 과거 물리·좌표·검증 결과를 현재 상태에 적용하지 않는다.
+- [이동식 발판 실험 종료 기록](../records/MOVABLE_STEP_EXPERIMENT.md): 2026-10-16 종료한 독립 프로토타입의 사용자 평가·보존 결정·검증 한계. 후속 실험의 필수 기믹이나 공간 공식으로 적용하지 않는다.
 
 현재 게임의 기준은 2인 협동 물리 플랫포머/퍼즐이다. 이것이 모든 레벨을 평지 스위치 퍼즐로 만들라는 뜻은 아니다. 이번 요청의 이동 숙련·탐험·학습 등 목표와 기획의 양쪽 기여를 함께 검토한다. Dev_PressureRelay와 D1·D2·D3 및 후속안은 테스트 사례이며 상시 제작 목표·기능 목록·필수 공간형이 아니다.
 
@@ -25,9 +26,10 @@
 | CASTLING | [CastlingAbility](../../Assets/Scripts/Characters/CastlingAbility.cs)는 참조된 두 Rigidbody2D의 위치를 교환하며 각자의 속도를 바꾸지 않는다. 코드에 거리·시야·횟수 제한이 없으므로 그런 제한으로 퍼즐의 우회를 막았다고 가정하지 않는다. 실제 부착·참조와 교환 후 충돌 여유는 별도 확인한다. |
 | 룩 이동 | [RookSlideAbility](../../Assets/Scripts/Characters/RookSlideAbility.cs)는 공중에서도 발동하는 수평 고정 직선 이동이며 이동 중 중력0이다. Shift 해제/앞쪽 Environment 충돌로 정지하며, 지면에서 점프하면 [PlayerMovement](../../Assets/Scripts/Characters/PlayerMovement.cs)에 가속 점프를 요청해 수평 속도를 유지한다. 실제 속도·유지/재발동·충돌·다른 능력과의 조합을 확인한다. Notion 후보의 상/하 이동은 이 코드에 없다. |
 | 스위치/문 | [PressurePlateSwitch](../../Assets/Scripts/Gameplay/Puzzles/PressurePlateSwitch.cs), [PressureGate](../../Assets/Scripts/Gameplay/Puzzles/PressureGate.cs): 밟는 동안 유지, 연결 스위치 중 하나라도 눌리면 열림, 열린 문 안의 몸체가 빠져나가야 닫힘. `Assets/Prefabs/Gameplay/PressureGatePair.prefab`이 있지만 대상 씬의 연결 상태는 확인해야 한다. |
+| 이동식 발판 | 2026-10-16 추가한 [PushablePlatform](../../Assets/Scripts/Gameplay/Puzzles/PushablePlatform.cs)·`Assets/Prefabs/Gameplay/PushablePlatform.prefab`. 물리 접촉으로 밀고 탑승하며 압력판과 문 보호 대상이다. [사용 안내](PUSHABLE_PLATFORM.md)에서 복구·문 받치기 대안·기존 낙사 복귀의 물체 미복원 한계를 확인한다. |
 | 실패/복귀 | [VoidRespawnZone](../../Assets/Scripts/Gameplay/VoidRespawnZone.cs): 참조된 한 명이 닿으면 양쪽을 지정 RoomEntry로 복귀시키며 암전 중 입력·물리 진행을 멈춘다. `Assets/Prefabs/Gameplay/VoidFallZone.prefab` 존재와 실제 배치를 구분한다. |
 | 룸/완료 | [RoomTransitionController](../../Assets/Scripts/Gameplay/Rooms/RoomTransitionController.cs), [RoomEntry](../../Assets/Scripts/Gameplay/Rooms/RoomEntry.cs), [RoomExit](../../Assets/Scripts/Gameplay/Rooms/RoomExit.cs), [ChapterGoal](../../Assets/Scripts/Gameplay/ChapterGoal.cs). 출구와 Goal은 양쪽 중심이 영역 안에 있는지 본다. Goal 코드가 있어도 현재 챕터 완료 판정이 배치됐다는 뜻은 아니다. |
-| 카메라 | [RoomArea](../../Assets/Scripts/Gameplay/Rooms/RoomArea.cs)의 BoxCollider2D 경계, RoomTransitionController의 TargetGroup·GroupFraming·Confiner 연동, [CameraAspectRatio](../../Assets/Scripts/Gameplay/CameraAspectRatio.cs)의 viewport 처리. [룸 안내](ROOM_AUTHORING.md)의 공유 화면·거리별 줌 확인법을 사용한다. |
+| 카메라 | [RoomArea](../../Assets/Scripts/Gameplay/Rooms/RoomArea.cs)의 BoxCollider2D 경계, RoomTransitionController의 TargetGroup·GroupFraming·Confiner 연동, [CameraAspectRatio](../../Assets/Scripts/Gameplay/CameraAspectRatio.cs)의 viewport 처리. [룸 안내](ROOM_AUTHORING.md#카메라가-보여주는-범위)의 사용자 결정인 기본 최소 직교 크기 8과 좁은 구역 예외, 공유 화면·거리별 줌 확인법을 사용한다. 현재 사용자 튜닝을 일괄 덮어쓰지 않는다. |
 | 지형 | `Assets/TilePalette/Main/`의 4종 지형 팔레트와 `Tiles/`의 6개 라이브러리. [PlatformTileLibrary](../../Assets/Scripts/Environment/PlatformTileLibrary.cs)·[PlatformFillLibrary](../../Assets/Scripts/Environment/PlatformFillLibrary.cs)는 Tile 하위 에셋을 묶는다. 개별 Tile은 경로만으로 식별되지 않을 수 있으므로 이름·GUID/local ID도 확인한다. |
 | 좌표/충돌 | 팔레트의 1×1 셀이나 Sprite의 128 PPU가 대상 씬 Grid의 1셀=1월드 단위를 증명하지 않는다. 큰 Sprite·곡선·셀 변환과 Sprite Physics Shape가 있어 타일이 찬 칸을 모두 같은 사각 충돌로 가정할 수 없다. 상세 사용법은 [플랫폼 안내](PLATFORM_SHEETS.md)를 읽는다. |
 
