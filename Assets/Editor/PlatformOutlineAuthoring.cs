@@ -33,6 +33,13 @@ public static class PlatformOutlineAuthoring
     private static bool paletteWasOpen;
     private static int resavingSceneHandle;
 
+    // During ExitingPlayMode, willChange can be false while runtime scenes are
+    // still closing. Keep all authoring callbacks blocked until Play has ended.
+    internal static bool IsPlayModeActive
+    {
+        get { return EditorApplication.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode; }
+    }
+
     private sealed class PendingExport
     {
         public Scene scene;
@@ -125,13 +132,14 @@ public static class PlatformOutlineAuthoring
         EditorApplication.delayCall += RestoreMissingPreviews;
         EditorApplication.update += RestoreExportsOnIdle;
         AssemblyReloadEvents.beforeAssemblyReload += ClearPending;
+        AssemblyReloadEvents.beforeAssemblyReload += SuspendPendingExports;
         paletteWasOpen = UnityEditor.Tilemaps.GridPaintPaletteWindow.isActive;
         EditorApplication.update += WatchPalette;
     }
 
     private static void Changed(Tilemap map, Tilemap.SyncTile[] changes)
     {
-        if (rebuilding || Undo.isProcessing || EditorApplication.isPlayingOrWillChangePlaymode || map == null) return;
+        if (rebuilding || Undo.isProcessing || PlatformOutlineAuthoring.IsPlayModeActive || map == null) return;
         var bake = map.GetComponentInParent<PlatformOutlineBake>();
         if (bake == null) return;
         HashSet<CellKey> cells;
@@ -142,7 +150,7 @@ public static class PlatformOutlineAuthoring
 
     public static void RequestUpdate(PlatformOutlineBake bake)
     {
-        if (bake != null && !EditorApplication.isPlayingOrWillChangePlaymode)
+        if (bake != null && !PlatformOutlineAuthoring.IsPlayModeActive)
         {
             Inputs.Remove(bake); ChangedCells.Remove(bake);
             QueueUpdate(bake, WithoutUndo);
@@ -176,7 +184,7 @@ public static class PlatformOutlineAuthoring
 
     private static void ApplyAfterPaletteClosed()
     {
-        if (EditorApplication.isPlayingOrWillChangePlaymode || UnityEditor.Tilemaps.GridPaintPaletteWindow.isActive) return;
+        if (PlatformOutlineAuthoring.IsPlayModeActive || UnityEditor.Tilemaps.GridPaintPaletteWindow.isActive) return;
         // Dirty flags survive script reloads. Opening and closing an unchanged
         // palette must not read every cell just to discover there is no work.
         for (int i = 0; i < SceneManager.sceneCount; i++)
@@ -192,6 +200,7 @@ public static class PlatformOutlineAuthoring
 
     private static void FlushPending(bool force)
     {
+        if (PlatformOutlineAuthoring.IsPlayModeActive) { ClearPending(); return; }
         if (!force && GUIUtility.hotControl != 0) return;
         var pending = new Dictionary<PlatformOutlineBake, int>(Pending);
         if (force)
@@ -366,7 +375,7 @@ public static class PlatformOutlineAuthoring
     private static void RestoreAfterUndo()
     {
         ClearPending();
-        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+        if (PlatformOutlineAuthoring.IsPlayModeActive) return;
         for (int i = 0; i < SceneManager.sceneCount; i++)
             foreach (var bake in Bakes(SceneManager.GetSceneAt(i)))
             {
@@ -377,6 +386,8 @@ public static class PlatformOutlineAuthoring
 
     private static void ReleaseScenePreviews(Scene scene, bool removingScene)
     {
+        // Scene reload must not destroy previews before Unity snapshots them for Play.
+        if (PlatformOutlineAuthoring.IsPlayModeActive) return;
         ClearExport(scene);
         foreach (var bake in Bakes(scene))
         {
@@ -397,7 +408,7 @@ public static class PlatformOutlineAuthoring
 
     private static void RestoreMissingPreviews()
     {
-        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+        if (PlatformOutlineAuthoring.IsPlayModeActive) return;
         RestorePendingExports();
         for (int i = 0; i < SceneManager.sceneCount; i++)
             foreach (var bake in Bakes(SceneManager.GetSceneAt(i)))
@@ -409,26 +420,55 @@ public static class PlatformOutlineAuthoring
 
     private static void PlayModeChanged(PlayModeStateChange state)
     {
-        if (state != PlayModeStateChange.ExitingEditMode) return;
-        for (int i = 0; i < SceneManager.sceneCount; i++) ClearExport(SceneManager.GetSceneAt(i));
+        if (state == PlayModeStateChange.ExitingEditMode)
+        {
+            // Play consumes the currently applied previews. Never turn it into
+            // an implicit terrain edit or a disk save for any loaded scene.
+            ClearPending();
+            SuspendPendingExports();
+        }
+        else if (state == PlayModeStateChange.EnteredEditMode)
+        {
+            RestoreMissingPreviews();
+            QueueExportCompletion();
+        }
+    }
+
+    private static void SuspendPendingExports()
+    {
+        // A delayed save may finish binding after Play or a script reload, but
+        // must not inherit permission to save again across either boundary.
+        foreach (var pending in PendingExports.Values)
+        {
+            pending.sceneSaved = false;
+            RememberExport(pending);
+        }
+        // A script reload may have left only a SessionState snapshot.
         for (int i = 0; i < SceneManager.sceneCount; i++)
         {
             var scene = SceneManager.GetSceneAt(i);
-            foreach (var bake in Bakes(scene)) Rebuild(bake, WithoutUndo, false, false);
-            // Keep the saved scene's older subassets until that scene is actually saved.
-            if (!string.IsNullOrEmpty(scene.path)) SaveSceneOutlines(scene, scene.path, false);
+            if (string.IsNullOrEmpty(scene.path)) continue;
+            string key = ExportSessionPrefix + Path.ChangeExtension(scene.path, ".platformoutlines");
+            string json = SessionState.GetString(key, "");
+            if (string.IsNullOrEmpty(json)) continue;
+            var snapshot = JsonUtility.FromJson<ExportSnapshot>(json);
+            if (snapshot == null) continue;
+            snapshot.sceneSaved = false;
+            SessionState.SetString(key, JsonUtility.ToJson(snapshot));
         }
+        EditorApplication.update -= CompletePendingExports;
     }
 
     private static void SaveScene(Scene scene, string path)
     {
-        if (scene.handle == resavingSceneHandle) return;
+        if (PlatformOutlineAuthoring.IsPlayModeActive || scene.handle == resavingSceneHandle) return;
         foreach (var bake in Bakes(scene)) Rebuild(bake, WithoutUndo, false, false);
         SaveSceneOutlines(scene, path, true);
     }
 
     private static void SavedScene(Scene scene)
     {
+        if (PlatformOutlineAuthoring.IsPlayModeActive) return;
         RestorePendingExports();
         PendingExport pending;
         if (PendingExports.TryGetValue(scene.handle, out pending)
@@ -442,7 +482,7 @@ public static class PlatformOutlineAuthoring
     [MenuItem("Tools/CASTLING/플랫폼 외곽선/선택한 그리드 전체 재계산")]
     public static void RebuildSelected()
     {
-        if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("편집 모드에서만 사용할 수 있습니다.");
+        if (PlatformOutlineAuthoring.IsPlayModeActive) throw new InvalidOperationException("편집 모드에서만 사용할 수 있습니다.");
         var selected = Selection.activeGameObject;
         var grid = selected == null ? null : selected.GetComponentInParent<Grid>();
         if (grid == null) throw new InvalidOperationException("지형 Grid 또는 Ground 타일맵을 선택하세요.");
@@ -456,7 +496,7 @@ public static class PlatformOutlineAuthoring
     {
         if (rebuilding) return;
         CancelBackground(bake); Pending.Remove(bake);
-        if (EditorApplication.isPlaying) throw new InvalidOperationException("Edit Mode only.");
+        if (PlatformOutlineAuthoring.IsPlayModeActive) throw new InvalidOperationException("Edit Mode only.");
         var grid = bake.GetComponent<Grid>();
         if (grid == null) throw new InvalidOperationException("PlatformOutlineBake requires a Grid.");
         int width = Mathf.Clamp(bake.widthPixels, 1, 64);
@@ -628,6 +668,7 @@ public static class PlatformOutlineAuthoring
 
     public static void ApplyEditedCells(PlatformOutlineBake bake, bool showProgress = true)
     {
+        if (PlatformOutlineAuthoring.IsPlayModeActive) throw new InvalidOperationException("Edit Mode only.");
         if (!TryRebuildChangedCells(bake, showProgress)) Rebuild(bake, showProgress ? -1 : WithoutUndo, false, showProgress);
     }
 
@@ -1073,6 +1114,7 @@ public static class PlatformOutlineAuthoring
 
     private static void SaveSceneOutlines(Scene scene, string scenePath, bool prune)
     {
+        if (PlatformOutlineAuthoring.IsPlayModeActive) return;
         ClearExport(scene);
         var renderers = new List<SpriteRenderer>();
         foreach (var bake in Bakes(scene))
@@ -1146,21 +1188,25 @@ public static class PlatformOutlineAuthoring
         return true;
     }
 
-    private static void BindSavedSprites(List<SpriteRenderer> renderers, Sprite[] sprites, List<Sprite> previews)
+    private static bool BindSavedSprites(List<SpriteRenderer> renderers, Sprite[] sprites, List<Sprite> previews)
     {
-        for (int i = 0; i < renderers.Count; i++) renderers[i].sprite = sprites[i];
+        bool changed = false;
+        for (int i = 0; i < renderers.Count; i++)
+            if (renderers[i].sprite != sprites[i]) { renderers[i].sprite = sprites[i]; changed = true; }
         ReleasePreviews(previews);
+        return changed;
     }
 
     private static void QueueExportCompletion()
     {
+        if (PlatformOutlineAuthoring.IsPlayModeActive) return;
         EditorApplication.update -= CompletePendingExports;
         EditorApplication.update += CompletePendingExports;
     }
 
     private static void RestoreExportsOnIdle()
     {
-        if (EditorApplication.isUpdating || EditorApplication.isCompiling) return;
+        if (PlatformOutlineAuthoring.IsPlayModeActive || EditorApplication.isUpdating || EditorApplication.isCompiling) return;
         EditorApplication.update -= RestoreExportsOnIdle;
         RestorePendingExports();
     }
@@ -1183,6 +1229,7 @@ public static class PlatformOutlineAuthoring
 
     private static void RestorePendingExports()
     {
+        if (PlatformOutlineAuthoring.IsPlayModeActive) return;
         for (int i = 0; i < SceneManager.sceneCount; i++)
         {
             var scene = SceneManager.GetSceneAt(i);
@@ -1205,14 +1252,18 @@ public static class PlatformOutlineAuthoring
             if (!valid) { SessionState.EraseString(ExportSessionPrefix + path); continue; }
             PendingExports[scene.handle] = new PendingExport {
                 scene = scene, path = path, renderers = renderers, names = new List<string>(snapshot.names),
-                previews = previews, sceneSaved = snapshot.sceneSaved
+                // A restored request belongs to an earlier lifecycle. Only a
+                // new explicit sceneSaved event may grant permission to resave.
+                previews = previews, sceneSaved = false
             };
+            RememberExport(PendingExports[scene.handle]);
             QueueExportCompletion();
         }
     }
 
     internal static void ImportedOutlines(string[] paths)
     {
+        if (PlatformOutlineAuthoring.IsPlayModeActive) return;
         foreach (var pending in PendingExports.Values)
             if (Array.IndexOf(paths, pending.path) >= 0) { QueueExportCompletion(); return; }
     }
@@ -1220,10 +1271,9 @@ public static class PlatformOutlineAuthoring
     private static void CompletePendingExports()
     {
         if (PendingExports.Count == 0) { EditorApplication.update -= CompletePendingExports; return; }
-        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        if (PlatformOutlineAuthoring.IsPlayModeActive)
         {
-            for (int i = 0; i < SceneManager.sceneCount; i++) ClearExport(SceneManager.GetSceneAt(i));
-            EditorApplication.update -= CompletePendingExports;
+            SuspendPendingExports();
             return;
         }
         if (EditorApplication.isUpdating || EditorApplication.isCompiling) return;
@@ -1257,7 +1307,7 @@ public static class PlatformOutlineAuthoring
             bool resave = pending.sceneSaved && !scene.isDirty;
             foreach (var bake in Bakes(scene)) if (NeedsApply(bake)) resave = false;
             ClearExport(scene);
-            BindSavedSprites(pending.renderers, sprites, pending.previews);
+            if (!BindSavedSprites(pending.renderers, sprites, pending.previews)) continue;
             EditorSceneManager.MarkSceneDirty(scene);
             if (!resave) continue;
             try
@@ -1298,10 +1348,10 @@ public sealed class PlatformOutlineBakeEditor : Editor
         }
         EditorGUILayout.HelpBox(bake.rebuildWhileEditing
             ? "칠하기·지우기가 끝나면 외곽선을 자동 갱신합니다. 흑백 내부 경계에는 선이 생기지 않습니다."
-            : "타일 편집 중에는 계산하지 않습니다. 배치가 끝나면 외곽선 적용을 누르세요. 저장·Play 진입 때도 갱신합니다.", MessageType.Info);
+            : "타일 편집 중에는 계산하지 않습니다. 배치가 끝나면 외곽선 적용을 누르세요. 실제 씬 저장 때도 갱신하며, Play는 현재 적용된 결과를 사용합니다.", MessageType.Info);
         if (PlatformOutlineAuthoring.NeedsApply(bake))
-            EditorGUILayout.HelpBox("외곽선에 아직 적용하지 않은 변경이 있습니다.", MessageType.Info);
-        using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
+            EditorGUILayout.HelpBox("외곽선에 아직 적용하지 않은 변경이 있습니다. 최신 지형으로 테스트하려면 Play 전에 외곽선 적용을 누르세요.", MessageType.Info);
+        using (new EditorGUI.DisabledScope(PlatformOutlineAuthoring.IsPlayModeActive))
             if (GUILayout.Button("외곽선 적용")) PlatformOutlineAuthoring.ApplyEditedCells(bake);
     }
 }
