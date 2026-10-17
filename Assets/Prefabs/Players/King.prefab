@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 4243127128993642624}
   - component: {fileID: 1700288398555590851}
   - component: {fileID: 7393169089773776235}
+  - component: {fileID: 2189414036167812119}
   m_Layer: 8
   m_Name: King
   m_TagString: Player
@@ -303,6 +304,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e82004c229807ae4abfbeb317f63b1d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2189414036167812119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5274617864318369794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 456dc2cae2d08b84a918cc09862c3827, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  successDuration: 0.24
+  failureDuration: 0.32
+  silhouetteOpacity: 0.32
+  strokeWidth: 0.045
 --- !u!1 &7010876972473807390
 GameObject:
   m_ObjectHideFlags: 0

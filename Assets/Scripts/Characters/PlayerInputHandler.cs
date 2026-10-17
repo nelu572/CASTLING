@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(PlayerInput), typeof(PlayerMovement))]
@@ -9,6 +10,9 @@ public sealed class PlayerInputHandler : MonoBehaviour
     private PlayerMovement movement;
     private CastlingAbility castling;
     private RookSlideAbility slide;
+    private InputAction castlingAction;
+    private bool hasInputFocus = true;
+    private int releaseCheckAfterFrame = -1;
 
     private void Awake()
     {
@@ -16,6 +20,34 @@ public sealed class PlayerInputHandler : MonoBehaviour
         movement = GetComponent<PlayerMovement>();
         castling = GetComponent<CastlingAbility>();
         slide = GetComponent<RookSlideAbility>();
+        castlingAction = playerInput.actions.FindAction("Castling", false);
+    }
+
+    private void OnEnable()
+    {
+        releaseCheckAfterFrame = Time.frameCount + 1;
+    }
+
+    private void Update()
+    {
+        if (castling == null || castlingAction == null || !hasInputFocus)
+        {
+            return;
+        }
+
+        if (!castling.IsAwaitingRelease || Time.frameCount <= releaseCheckAfterFrame)
+        {
+            return;
+        }
+
+        foreach (InputControl control in castlingAction.controls)
+        {
+            if (control.IsPressed()) return;
+        }
+
+        // A release while the action was disabled has no canceled callback.
+        castling.CancelCastling();
+        castling.SetCastlingHeld(false, InputState.currentTime);
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -43,9 +75,41 @@ public sealed class PlayerInputHandler : MonoBehaviour
 
     public void OnCastling(InputAction.CallbackContext context)
     {
-        if (playerInput.inputIsActive && context.performed)
+        if (context.canceled)
         {
-            castling?.RequestCastling();
+            // Disabling an action also sends canceled before its enabled flags change.
+            bool released = context.control != null && !context.control.IsPressed();
+            if (released && isActiveAndEnabled && playerInput.inputIsActive && context.action.enabled)
+            {
+                castling?.SetCastlingHeld(false, context.time);
+            }
+            else
+            {
+                castling?.CancelCastling();
+                releaseCheckAfterFrame = Time.frameCount + 1;
+            }
+        }
+        else if (hasInputFocus && isActiveAndEnabled && playerInput.inputIsActive && context.performed)
+        {
+            castling?.SetCastlingHeld(true, context.time);
+        }
+    }
+
+    private void OnDisable()
+    {
+        castling?.CancelCastling();
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        hasInputFocus = hasFocus;
+        if (!hasFocus)
+        {
+            castling?.CancelCastling();
+        }
+        else
+        {
+            releaseCheckAfterFrame = Time.frameCount + 1;
         }
     }
 
