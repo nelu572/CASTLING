@@ -65,6 +65,15 @@ Play 중 경계의 크기·위치가 바뀌면 Cinemachine 경계 캐시와 보�
 
 ## 참조 점검
 
+### 공동 복귀점과 챕터 메뉴
+
+- `VoidRespawnZone`의 최초 `Respawn Entry`는 기본 재시작 위치다. `CooperativeCheckpoint`의 `Recovery`에 같은 룸의 활성 공허 판정, `Entry`에 안전한 별도 RoomEntry, `Order`에 진행 순서를 연결한다. 범위는 Trigger BoxCollider2D로 편집하고 두 시작 마커가 지형·서로의 몸체에 겹치지 않는지 확인한다.
+- 공동 복귀점은 두 중심이 동시에 범위 안에 있고 둘 다 접지해 수직 이동이 안정됐을 때만 활성화된다. 순서가 더 높은 복귀점을 되돌리지 않는다. `Activated Visual`은 선택 사항이며 씬에서 비활성 상태로 저장한다. 이 표시는 복귀 갱신의 피드백이며 실제 충돌면을 만들지 않는다.
+- 같은 킹·룩을 담당하는 공허 판정을 중복 배치하지 않는다. 한 영역이 낙하를 담당하고 최초 Entry와 공동 복귀점을 구분한다. 중단·재시도 뒤 입력·이동·시간 정지가 남지 않는지 검사한다.
+- `ChapterMenu`는 같은 공허 판정과 Pause/ConfirmRestart 패널을 참조한다. 시작 화면이나 시작 버튼 없이 바로 플레이한다. Esc 메뉴는 `PlayerInputHandler`의 gameplay 입력을 막고 시간을 멈춘다. PlayerInput의 action 관측과 운동 컴포넌트를 유지해 진행 중 가속 점프·공중 직선 이동을 보존한다. F 충전은 취소하며 다시 눌러야 한다. 계속할 때 현재 Move/Shift를 반영하므로 메뉴 중 Shift를 놓으면 직선 이동도 종료한다. 확인 후 재시도는 현재 공동 복귀점을 사용하고 운동을 초기화한다. Canvas와 버튼·이벤트 연결은 씬에 저장한다. 완료 표시는 메뉴 패널보다 먼저 그려지도록 형제 순서를 둔다. 암전 Canvas는 메뉴보다 위에 둔다.
+- `ChapterGoal`은 킹·룩 Transform, Trigger BoxCollider2D, 비활성 완료 표시를 연결한다. 두 중심이 함께 영역에 들어오면 한 번 완료한다. 다음 씬을 자동으로 불러오지 않는다.
+- Chapter_01의 한글 UI는 [Fonts 안내](../../Assets/Fonts/README.md)의 Static TMP 에셋을 사용한다. 새 문구를 넣으면 글리프를 갱신하고 실제 Play 화면에서 누락·넘침·키보드 선택을 확인한다.
+
 복제한 룸에서 특히 아래 연결을 확인한다.
 
 | 컴포넌트 | 연결 대상 |
@@ -77,3 +86,11 @@ Play 중 경계의 크기·위치가 바뀌면 Cinemachine 경계 캐시와 보�
 | `BackgroundParallax` | 공통 `Main Camera`, 같은 룸의 `ParallaxOrigin` |
 
 `RoomTransitionController`의 킹·룩, `Rooms Root`, `Starting Entry`, `Fade Overlay` 참조와 컨트롤러가 있는 오브젝트의 `CinemachineTargetGroup`도 확인한다. `Starting Entry`는 해당 `Rooms Root` 안의 룸에 있어야 하며 마커 두 개가 연결돼 있어야 한다. `RoomArea` 참조, Confiner 경계 또는 `CinemachineGroupFraming`이 빠져도 플레이 시작 시 Console 오류가 나고 룸 전환이 비활성화된다.
+
+## 레벨 보관 씬
+
+- 쓸 수 있는 응용 구간은 `Assets/Scenes/_Development/LevelCollection.unity`에 모은다. 정식 챕터 순서나 자동 진행을 뜻하지 않는 Editor용 보관 씬이다. 현재 `Level_A`는 문·CASTLING 인계, `Level_B`는 상자 공급·공동 상승이다.
+- 각 레벨 루트 안에 지형·캐릭터·카메라·입장점·공허 복귀·메뉴를 함께 보관한다. **Edit 모드에서 한 루트만 켜고 다른 루트는 끈 뒤 Play**한다. 기본 저장 상태는 A 켜짐/B 꺼짐이다. 다른 안을 볼 때는 Stop 후 루트를 전환한다. 새 선택 UI나 Play 중 전환 기능은 추가하지 않는다.
+- 시작 위치·실시간 미리보기 도구는 활성 루트의 컨트롤러를 사용한다. 배치 편집 전 미리보기를 끄는 기존 절차를 따른다. 레벨을 추가할 때 자기 rig 안의 참조를 유지하고 다른 레벨의 캐릭터·카메라·복귀 장치를 참조하지 않게 한다.
+- 각 Grid의 `PlatformOutlineBake.sources`에는 자기 Ground를 명시한다. 비활성 루트를 포함한 외곽선은 씬과 같은 폴더의 `LevelCollection.platformoutlines` 하나에 저장한다. 비활성 Tilemap의 native Grid 연결·셀 계산이 사라지는 경우에도 계층의 Grid로 편집용 계산을 수행한다.
+- 개별 `Chapter_01_A/B/C` 시안 씬과 전용 외곽선은 통합 검증 뒤 정리했다. 기존 `Chapter_01`은 별도로 보존한다. 보관 씬은 런타임 이름 로딩·배포 목록에 추가하지 않았다.
