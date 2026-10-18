@@ -12,6 +12,7 @@ public sealed class PlayerInputHandler : MonoBehaviour
     private RookSlideAbility slide;
     private InputAction castlingAction;
     private bool hasInputFocus = true;
+    private bool gameplayPaused;
     private int releaseCheckAfterFrame = -1;
 
     private void Awake()
@@ -52,7 +53,7 @@ public sealed class PlayerInputHandler : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (!playerInput.inputIsActive || (!context.performed && !context.canceled))
+        if (gameplayPaused || !playerInput.inputIsActive || (!context.performed && !context.canceled))
         {
             return;
         }
@@ -64,7 +65,7 @@ public sealed class PlayerInputHandler : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (playerInput.inputIsActive && context.performed)
+        if (!gameplayPaused && playerInput.inputIsActive && context.performed)
         {
             if (slide == null || !slide.TryJump())
             {
@@ -89,7 +90,7 @@ public sealed class PlayerInputHandler : MonoBehaviour
                 releaseCheckAfterFrame = Time.frameCount + 1;
             }
         }
-        else if (hasInputFocus && isActiveAndEnabled && playerInput.inputIsActive && context.performed)
+        else if (!gameplayPaused && hasInputFocus && isActiveAndEnabled && playerInput.inputIsActive && context.performed)
         {
             castling?.SetCastlingHeld(true, context.time);
         }
@@ -115,11 +116,32 @@ public sealed class PlayerInputHandler : MonoBehaviour
 
     public void OnSlide(InputAction.CallbackContext context)
     {
-        if (!playerInput.inputIsActive || (!context.performed && !context.canceled))
+        if (gameplayPaused || !playerInput.inputIsActive || (!context.performed && !context.canceled))
         {
             return;
         }
 
         slide?.SetSlideHeld(context.ReadValueAsButton());
+    }
+
+    public void SetGameplayPaused(bool paused)
+    {
+        gameplayPaused = paused;
+        if (paused)
+        {
+            // Pause preserves movement state, but never queues a CASTLING attempt.
+            castling?.CancelCastling();
+            return;
+        }
+
+        if (playerInput == null || movement == null || !playerInput.inputIsActive) return;
+
+        // Actions keep observing held controls while callbacks are gated. Use this
+        // player's map: King and Rook both have an action named Move.
+        InputActionMap map = playerInput.currentActionMap;
+        float horizontal = map?.FindAction("Move", false)?.ReadValue<float>() ?? 0f;
+        movement.SetHorizontalInput(horizontal);
+        slide?.SetHorizontalInput(horizontal);
+        slide?.SetSlideHeld(map?.FindAction("Slide", false)?.IsPressed() ?? false);
     }
 }

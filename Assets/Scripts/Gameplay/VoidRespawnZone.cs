@@ -18,10 +18,38 @@ public sealed class VoidRespawnZone : MonoBehaviour
     private bool[] originalInputActive;
     private bool[] originalMovementEnabled;
     private float previousTimeScale;
+    private RoomEntry checkpointEntry;
+    private int checkpointOrder;
 
     public bool IsRespawning { get; private set; }
     public int RespawnCount { get; private set; }
-    public RoomEntry RespawnEntry => respawnEntry;
+    public RoomEntry RespawnEntry => checkpointEntry != null ? checkpointEntry : respawnEntry;
+    public Rigidbody2D King => king;
+    public Rigidbody2D Rook => rook;
+
+    public bool SetCheckpoint(RoomEntry entry, int order)
+    {
+        if (IsRespawning || entry == null || !entry.IsConfigured || order <= checkpointOrder ||
+            entry.Room != respawnEntry.Room)
+        {
+            return false;
+        }
+
+        checkpointEntry = entry;
+        checkpointOrder = order;
+        return true;
+    }
+
+    public bool RequestRespawn()
+    {
+        if (!isActiveAndEnabled || IsRespawning || Time.timeScale <= 0f)
+        {
+            return false;
+        }
+
+        StartCoroutine(Respawn());
+        return true;
+    }
 
     private void Awake()
     {
@@ -49,12 +77,13 @@ public sealed class VoidRespawnZone : MonoBehaviour
             return;
         }
 
-        StartCoroutine(Respawn());
+        RequestRespawn();
     }
 
     private IEnumerator Respawn()
     {
         IsRespawning = true;
+        RoomEntry destination = RespawnEntry;
         previousTimeScale = Time.timeScale;
         king.GetComponent<RookSlideAbility>()?.StopSlide();
         rook.GetComponent<RookSlideAbility>()?.StopSlide();
@@ -69,11 +98,11 @@ public sealed class VoidRespawnZone : MonoBehaviour
         Time.timeScale = 0f;
         yield return Fade(0f, 1f);
 
-        MovePlayer(king, respawnEntry.KingPoint.position);
-        MovePlayer(rook, respawnEntry.RookPoint.position);
+        MovePlayer(king, destination.KingPoint.position);
+        MovePlayer(rook, destination.RookPoint.position);
         Physics2D.SyncTransforms();
         targetGroup.DoUpdate();
-        respawnEntry.Room.Camera.PreviousStateIsValid = false;
+        destination.Room.Camera.PreviousStateIsValid = false;
 
         yield return null;
         yield return Fade(1f, 0f);
@@ -98,6 +127,7 @@ public sealed class VoidRespawnZone : MonoBehaviour
 
     private static void MovePlayer(Rigidbody2D player, Vector3 point)
     {
+        player.GetComponent<PlayerMovement>().ClearGroundedHistory();
         player.linearVelocity = Vector2.zero;
         player.angularVelocity = 0f;
         player.position = point;
