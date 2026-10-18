@@ -270,7 +270,7 @@ public static class PlatformOutlineAuthoring
         bool convert = maps.Length == 0 || bake.generatedRoot == null;
         foreach (var map in maps)
         {
-            if (map == null || map.layoutGrid != grid) throw new InvalidOperationException("All sources must use this Grid.");
+            if (map == null || SourceGrid(map) != grid) throw new InvalidOperationException("All sources must use this Grid.");
             foreach (var tile in UsedTiles(map)) if (PlatformFillAuthoring.GetFill(tile) != tile) convert = true;
         }
         if (convert)
@@ -536,7 +536,7 @@ public static class PlatformOutlineAuthoring
             var replacements = new Dictionary<TileBase, Tile>();
             foreach (var map in maps)
             {
-                if (map == null || map.layoutGrid != grid) throw new InvalidOperationException("All sources must use this Grid.");
+                if (map == null || SourceGrid(map) != grid) throw new InvalidOperationException("All sources must use this Grid.");
                 foreach (var source in map.GetUsedTilesCount() == 0 ? new TileBase[0] : UsedTiles(map))
                     replacements[source] = PlatformFillAuthoring.GetFill(source);
             }
@@ -871,6 +871,12 @@ public static class PlatformOutlineAuthoring
         order = a.cell.y.CompareTo(b.cell.y); return order != 0 ? order : a.cell.x.CompareTo(b.cell.x);
     }
 
+    private static Grid SourceGrid(Tilemap map)
+    {
+        // Inactive Tilemaps lose their native Grid link; their hierarchy still owns it.
+        return map.layoutGrid != null ? map.layoutGrid : map.GetComponentInParent<Grid>(true);
+    }
+
     private static string InputContext(Grid grid, Tilemap[] maps, int width)
     {
         using (var stream = new MemoryStream())
@@ -882,7 +888,7 @@ public static class PlatformOutlineAuthoring
                 writer.Write(AssetDatabase.GetAssetDependencyHash(PlatformFillAuthoring.LibraryPath).ToString());
                 foreach (var map in maps)
                 {
-                    if (map == null || map.layoutGrid != grid) return null;
+                    if (map == null || SourceGrid(map) != grid) return null;
                     writer.Write(map.GetInstanceID());
                     foreach (var matrix in new[] { grid.transform.worldToLocalMatrix * map.transform.localToWorldMatrix, map.orientationMatrix })
                         for (int i = 0; i < 16; i++) writer.Write(matrix[i]);
@@ -937,8 +943,12 @@ public static class PlatformOutlineAuthoring
                     }
                     cache[sprite.texture] = source;
                 }
+                // Native Tilemap cell conversion also returns zero while its hierarchy is inactive.
+                var cellPosition = map.layoutGrid != null
+                    ? map.CellToLocalInterpolated((Vector3)cell + map.tileAnchor)
+                    : grid.CellToLocalInterpolated((Vector3)cell + map.tileAnchor);
                 var matrix = grid.transform.worldToLocalMatrix * map.transform.localToWorldMatrix
-                    * Matrix4x4.Translate(map.CellToLocalInterpolated((Vector3)cell + map.tileAnchor)) * map.GetTransformMatrix(cell);
+                    * Matrix4x4.Translate(cellPosition) * map.GetTransformMatrix(cell);
                 var bounds = sprite.bounds;
                 var a = matrix.MultiplyPoint3x4(new Vector3(bounds.min.x, bounds.min.y));
                 var b = matrix.MultiplyPoint3x4(new Vector3(bounds.max.x, bounds.min.y));
