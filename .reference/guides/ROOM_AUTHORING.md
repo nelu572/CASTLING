@@ -89,7 +89,7 @@ Play 중 경계의 크기·위치가 바뀌면 Cinemachine 경계 캐시와 보�
 
 ## 레벨 보관 씬
 
-- 쓸 수 있는 응용 구간은 `Assets/Scenes/_Development/LevelCollection.unity`에 모은다. 정식 챕터 순서나 자동 진행을 뜻하지 않는 Editor용 보관 씬이다. 현재 `Level_A`는 문·CASTLING 인계, `Level_B`는 상자 공급·공동 상승이다.
+- `Assets/Scenes/_Development/LevelCollection.unity`는 **Chapter_01과 별개의 독립 레벨을 모으는 Editor용 보관 씬**이다. 현재 `Level_A`는 문·CASTLING 인계, `Level_B`는 상자 공급·공동 상승이다. A·B의 챕터 귀속·등장 순서·최종 채택은 미정이다. 레벨 목록·해법·추가 기준은 [레벨 보관소](../levels/README.md), 제작·평가 결정은 [독립 레벨 기록](../records/LEVEL_COLLECTION.md)에서 관리한다.
 - 각 레벨 루트 안에 지형·캐릭터·카메라·입장점·공허 복귀·메뉴를 함께 보관한다. **Edit 모드에서 한 루트만 켜고 다른 루트는 끈 뒤 Play**한다. 기본 저장 상태는 A 켜짐/B 꺼짐이다. 다른 안을 볼 때는 Stop 후 루트를 전환한다. 새 선택 UI나 Play 중 전환 기능은 추가하지 않는다.
 - 시작 위치·실시간 미리보기 도구는 활성 루트의 컨트롤러를 사용한다. 배치 편집 전 미리보기를 끄는 기존 절차를 따른다. 레벨을 추가할 때 자기 rig 안의 참조를 유지하고 다른 레벨의 캐릭터·카메라·복귀 장치를 참조하지 않게 한다.
 - 각 Grid의 `PlatformOutlineBake.sources`에는 자기 Ground를 명시한다. 비활성 루트를 포함한 외곽선은 씬과 같은 폴더의 `LevelCollection.platformoutlines` 하나에 저장한다. 비활성 Tilemap의 native Grid 연결·셀 계산이 사라지는 경우에도 계층의 Grid로 편집용 계산을 수행한다.

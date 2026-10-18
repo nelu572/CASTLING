@@ -20,7 +20,9 @@
 │  └─ template.md
 ├─ VERIFICATION_TEMPLATE/
 │  └─ template.md
-└─ RECORD_TEMPLATE/
+├─ RECORD_TEMPLATE/
+│  └─ template.md
+└─ LEVEL_LIBRARY_TEMPLATE/
    └─ template.md
 .work/            # 작업별 임시 자료와 정리 안내
 .codex/           # Codex 하네스와 작업 절차
@@ -28,6 +30,7 @@
 └─ skills/        # 레벨 디자인·커밋·PR·이슈·검증·Notion 안내 갱신 절차 파일
 .reference/       # 프로젝트 사용 안내·기획·기록
 ├─ guides/        # 레벨 설계 근거·룸·배경·플랫폼 에셋 사용 안내
+├─ levels/        # 독립 레벨 보관소·레벨별 해법과 재사용 안내
 ├─ notion/        # Notion 기획 원문 안내
 └─ records/       # 보존할 제작 결정과 미확정 범위
 ```
@@ -44,7 +47,7 @@
 
 작업 규칙은 [AGENTS.md](AGENTS.md)와 [Unity 하네스](.codex/harness/UNITY.md), 검증 절차는 [Unity 변경 검증](.codex/skills/UNITY_VERIFY.md)을 따른다. 룸·타일 작업에는 [룸 만들기](.reference/guides/ROOM_AUTHORING.md), [배경 구조물 조립](.reference/guides/BG_STRUCTURE_MODULAR.md), [플랫폼 타일 사용법](.reference/guides/PLATFORM_SHEETS.md)을 참고한다.
 
-[Chapter_01 기록](.reference/records/CHAPTER_01.md)은 당시 사용자 결정과 미확정 범위를 모은 문서다. 현재 씬 설정이나 확정 기획을 대신하지 않는다.
+독립 레벨의 아이디어·해법은 [레벨 보관소](.reference/levels/README.md)에서 찾는다. 목록에서 레벨별 카드·실제 씬·평가로 이동하며 [카드 양식](.templates/LEVEL_LIBRARY_TEMPLATE/template.md)으로 새 후보를 추가한다. A·B를 포함한 보관 레벨의 챕터·순서는 별도 결정한다. 사용자 승인·평가는 [독립 레벨 결정 기록](.reference/records/LEVEL_COLLECTION.md), Chapter_01의 결정은 [해당 챕터 기록](.reference/records/CHAPTER_01.md)에서 관리한다.
 
 레벨 작업은 [레벨 디자인 절차](.codex/skills/LEVEL_DESIGN.md)에 따라 **요청·게임 분석 → 목표 경험/설계 전략 선택 → 공간 설계·승인 → 구현 → 기술·게임플레이·공간 평가 → 개선** 순서로 진행하며, 요청한 단계까지만 수행한다. [프로젝트 근거](.reference/guides/LEVEL_DESIGN_CONTEXT.md), [작품별 레퍼런스 분석 자료](.reference/guides/LEVEL_DESIGN_REFERENCES.md), [설계 양식](.templates/LEVEL_DESIGN_TEMPLATE/template.md)을 구분해 사용한다. 특정 레퍼런스·지형형·기믹을 공통 기본값으로 삼지 않으며 부족한 조건은 프로젝트에서 파악한다. 요청 예시는 절차 문서에 있다. 자동 배치·도달성 검사 프로그램은 포함하지 않는다.
 
