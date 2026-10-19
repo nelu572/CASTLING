@@ -102,6 +102,8 @@ public sealed class VoidRespawnZone : MonoBehaviour
         MovePlayer(rook, destination.RookPoint.position);
         Physics2D.SyncTransforms();
         targetGroup.DoUpdate();
+        // A camera reset can skip group framing's lens-change detection after a zoomed-out death.
+        destination.Room.Camera.GetComponent<Unity.Cinemachine.CinemachineConfiner2D>()?.InvalidateLensCache();
         destination.Room.Camera.PreviousStateIsValid = false;
 
         yield return null;
