@@ -87,6 +87,12 @@ Play 중 경계의 크기·위치가 바뀌면 Cinemachine 경계 캐시와 보�
 
 `RoomTransitionController`의 킹·룩, `Rooms Root`, `Starting Entry`, `Fade Overlay` 참조와 컨트롤러가 있는 오브젝트의 `CinemachineTargetGroup`도 확인한다. `Starting Entry`는 해당 `Rooms Root` 안의 룸에 있어야 하며 마커 두 개가 연결돼 있어야 한다. `RoomArea` 참조, Confiner 경계 또는 `CinemachineGroupFraming`이 빠져도 플레이 시작 시 Console 오류가 나고 룸 전환이 비활성화된다.
 
+## 압력문 동작 선택
+
+`PressureGate`의 `Require All Switches`를 켜면 연결된 판이 모두 동시에 눌려야 열린다. 끄면 기존처럼 한 판만 눌려도 열린다. `Keep Open Once Activated`를 켜면 조건을 한 번 만족한 뒤 판을 떠나도 개방을 유지한다. 두 옵션의 기본값은 꺼짐이며 기존 프리팹의 OR 동작은 유지한다.
+
+고정 개방 상태는 런타임 인스턴스에만 저장하므로 `VoidRespawnZone`의 낙사·공동 재시도로는 초기화하지 않고 새 Play/씬 인스턴스에서 초기화한다. `Open Offset`은 셔터의 실제 높이와 상·하 통로를 함께 보고 정하며, Collider 개방뿐 아니라 시각 이동이 끝난 화면에서도 통로가 비어 있는지 확인한다.
+
 ## 레벨 보관 씬
 
 - `Assets/Scenes/_Development/LevelCollection.unity`는 **Chapter_01과 별개의 독립 레벨을 모으는 Editor용 보관 씬**이다. 현재 `Level_A`는 문·CASTLING 인계, `Level_B`는 상자 공급·공동 상승이다. A·B의 챕터 귀속·등장 순서·최종 채택은 미정이다. 레벨 목록·해법·추가 기준은 [레벨 보관소](../levels/README.md), 제작·평가 결정은 [독립 레벨 기록](../records/LEVEL_COLLECTION.md)에서 관리한다.

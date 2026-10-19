@@ -4,6 +4,8 @@ using UnityEngine;
 public sealed class PressureGate : MonoBehaviour
 {
     [SerializeField] private PressurePlateSwitch[] switches;
+    [SerializeField] private bool requireAllSwitches;
+    [SerializeField] private bool keepOpenOnceActivated;
     [SerializeField] private BoxCollider2D blockingCollider;
     [SerializeField] private Transform shutter;
     [SerializeField] private SpriteRenderer indicator;
@@ -15,6 +17,7 @@ public sealed class PressureGate : MonoBehaviour
     private readonly Collider2D[] overlaps = new Collider2D[8];
     private ContactFilter2D occupantFilter;
     private Vector3 closedShutterPosition;
+    private bool activated;
 
     public bool IsOpen { get; private set; }
 
@@ -42,19 +45,23 @@ public sealed class PressureGate : MonoBehaviour
         }
 
         closedShutterPosition = shutter.localPosition;
+        activated = false;
         SetOpen(false);
     }
 
     private void FixedUpdate()
     {
-        bool requestedOpen = false;
+        bool requestedOpen = requireAllSwitches;
         foreach (PressurePlateSwitch plate in switches)
         {
-            requestedOpen |= plate.isActiveAndEnabled && plate.IsPressed;
+            bool pressed = plate.isActiveAndEnabled && plate.IsPressed;
+            requestedOpen = requireAllSwitches ? requestedOpen && pressed : requestedOpen || pressed;
         }
 
+        if (keepOpenOnceActivated && requestedOpen) activated = true;
+
         // Wait for bodies to clear the doorway before restoring a solid collider.
-        SetOpen(requestedOpen || (IsOpen && PassageOccupied()));
+        SetOpen(requestedOpen || activated || (IsOpen && PassageOccupied()));
     }
 
     private bool PassageOccupied()
