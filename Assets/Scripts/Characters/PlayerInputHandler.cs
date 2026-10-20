@@ -67,10 +67,7 @@ public sealed class PlayerInputHandler : MonoBehaviour
     {
         if (!gameplayPaused && playerInput.inputIsActive && context.performed)
         {
-            if (slide == null || !slide.TryJump())
-            {
-                movement.RequestJump();
-            }
+            movement.RequestJump();
         }
     }
 

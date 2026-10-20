@@ -25,7 +25,7 @@
 | 이동 수치 | [PlayerMovementSettings](../../Assets/Scripts/Characters/PlayerMovementSettings.cs)에 가감속·점프·중력·하강 배율·코요테/버퍼가 있다. `Assets/SO/PlayerMovementSettings.asset`의 존재만으로 현재 플레이어 연결·유효 수치를 확정하지 않는다. |
 | 입력 | [PlayerInputHandler](../../Assets/Scripts/Characters/PlayerInputHandler.cs), [CastlingInputActions](../../Assets/Input/CastlingInputActions.inputactions)에 킹 A/D·W·F, 룩 좌/우·위·오른쪽 Shift 바인딩이 있다. 다른 InputActions 파일도 있으므로 현재 PlayerInput 참조와 action map을 대조한다. |
 | CASTLING | [CastlingAbility](../../Assets/Scripts/Characters/CastlingAbility.cs)는 참조된 두 Rigidbody2D의 위치를 교환하며 각자의 속도를 바꾸지 않는다. 코드에 거리·시야·횟수 제한이 없으므로 그런 제한으로 퍼즐의 우회를 막았다고 가정하지 않는다. 실제 부착·참조와 교환 후 충돌 여유는 별도 확인한다. |
-| 룩 이동 | [RookSlideAbility](../../Assets/Scripts/Characters/RookSlideAbility.cs)는 공중에서도 발동하는 수평 고정 직선 이동이며 이동 중 중력0이다. Shift 해제/앞쪽 Environment 충돌로 정지하며, 지면에서 점프하면 [PlayerMovement](../../Assets/Scripts/Characters/PlayerMovement.cs)에 가속 점프를 요청해 수평 속도를 유지한다. 실제 속도·유지/재발동·충돌·다른 능력과의 조합을 확인한다. Notion 후보의 상/하 이동은 이 코드에 없다. |
+| 룩 이동 | 일반 점프와 [RookSlideAbility](../../Assets/Scripts/Characters/RookSlideAbility.cs)의 좌우 직선 이동은 별도 동작이다. 직선 이동은 공중에서도 발동하며 방향 고정·중력0이고, Shift 해제/앞쪽 Environment 충돌로 정지한다. 이동 중 점프로 전환하거나 착지까지 스킬 속도를 고정하는 기능은 없다. 실제 속도·유지/재발동·충돌·다른 능력과의 조합을 확인한다. Notion 후보의 상/하 이동은 이 코드에 없다. |
 | 스위치/문 | [PressurePlateSwitch](../../Assets/Scripts/Gameplay/Puzzles/PressurePlateSwitch.cs), [PressureGate](../../Assets/Scripts/Gameplay/Puzzles/PressureGate.cs): 밟는 동안 유지, 연결 스위치 중 하나라도 눌리면 열림, 열린 문 안의 몸체가 빠져나가야 닫힘. `Assets/Prefabs/Gameplay/PressureGatePair.prefab`이 있지만 대상 씬의 연결 상태는 확인해야 한다. |
 | 이동식 발판 | 2026-10-16 추가한 [PushablePlatform](../../Assets/Scripts/Gameplay/Puzzles/PushablePlatform.cs)·`Assets/Prefabs/Gameplay/PushablePlatform.prefab`. 물리 접촉으로 밀고 탑승하며 압력판과 문 보호 대상이다. [사용 안내](PUSHABLE_PLATFORM.md)에서 복구·문 받치기 대안·기존 낙사 복귀의 물체 미복원 한계를 확인한다. |
 | 실패/복귀 | [VoidRespawnZone](../../Assets/Scripts/Gameplay/VoidRespawnZone.cs): 참조된 한 명이 닿으면 양쪽을 지정 RoomEntry로 복귀시키며 암전 중 입력·물리 진행을 멈춘다. `Assets/Prefabs/Gameplay/VoidFallZone.prefab` 존재와 실제 배치를 구분한다. |
@@ -47,7 +47,7 @@
 
 배경 타일은 [배경 구조물 조립](BG_STRUCTURE_MODULAR.md)의 기존 팔레트·충돌 제외 원칙을 따른다. 화면의 장식과 플레이 지형을 같은 통과 가능성 자료로 취급하지 않는다.
 
-걷기·점프·밟기/밀기·CASTLING·룩 수평 이동·압력판/문·복귀 중 필요한 재료만 선택한다. 레퍼런스의 대시·벽타기나 탐험용 지도·수집/저장 시스템 등은 이 목록에 확인된 기능이 아니다. 필요하면 실제 구현·참조를 추가 조사하고, 없으면 미구현 제안으로 남긴다. 새 목표 장치가 필요할 때도 기존 코드 존재와 해당 씬에서의 완료 작동을 구분한다.
+걷기·점프·밟기/밀기·CASTLING·룩 수평 이동·압력판/문·복귀 중 필요한 재료만 선택한다. **룩 가속 점프는 2026-10-20 삭제된 기능이며, 레벨의 해법·도달 거리·필수 동작으로 가정하거나 복원하지 않는다.** `.work`의 과거 시안·검사 기록·복구용 백업은 당시 자료이며 현재 능력의 근거로 사용하지 않는다. 현행 기능은 위 코드와 대상 씬에서 확인한다. 레퍼런스의 대시·벽타기나 탐험용 지도·수집/저장 시스템 등도 이 목록에 확인된 기능이 아니다. 필요하면 실제 구현·참조를 추가 조사하고, 없으면 미구현 제안으로 남긴다. 새 목표 장치가 필요할 때도 기존 코드 존재와 해당 씬에서의 완료 작동을 구분한다.
 
 ## Unity MCP 활용과 현재 한계
 
