@@ -5,6 +5,7 @@ using UnityEngine;
 public sealed class RookSlideAbility : MonoBehaviour
 {
     [SerializeField] private PlayerMovementSettings settings;
+    [SerializeField, Min(0f)] private float maximumAirTime = 0.6f;
 
     private Rigidbody2D body;
     private PlayerMovement movement;
@@ -16,11 +17,13 @@ public sealed class RookSlideAbility : MonoBehaviour
 
     public bool IsMoving { get; private set; }
     public float Direction { get; private set; }
+    public float RemainingAirTime { get; private set; }
 
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
         movement = GetComponent<PlayerMovement>();
+        RemainingAirTime = maximumAirTime;
         if (settings == null)
         {
             Debug.LogError("Rook slide movement settings are missing.", this);
@@ -55,6 +58,15 @@ public sealed class RookSlideAbility : MonoBehaviour
             return;
         }
 
+        if (movement.HasGroundContact)
+        {
+            RemainingAirTime = maximumAirTime;
+        }
+        else if (RemainingAirTime <= 0f)
+        {
+            return;
+        }
+
         Direction = Mathf.Sign(horizontalInput);
         originalGravity = body.gravityScale;
         originalMovementEnabled = movement.enabled;
@@ -67,6 +79,21 @@ public sealed class RookSlideAbility : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // PlayerMovement is disabled during a slide, so observe ground directly.
+        if (movement.HasGroundContact)
+        {
+            RemainingAirTime = maximumAirTime;
+        }
+        else if (IsMoving)
+        {
+            RemainingAirTime = Mathf.Max(0f, RemainingAirTime - Time.fixedDeltaTime);
+            if (RemainingAirTime <= 0f)
+            {
+                StopSlide();
+                return;
+            }
+        }
+
         if (IsMoving)
         {
             body.linearVelocity = Vector2.right * (Direction * settings.MaximumRunSpeed * 2f);
